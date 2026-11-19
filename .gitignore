@@ -20,6 +20,7 @@ out/
 uploads/
 server/uploads/
 server/data/
+data/
 *.log
 
 # Testing & Coverage

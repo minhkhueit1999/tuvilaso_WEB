@@ -1,0 +1,13 @@
+{
+  "name": "tuvilaso-web-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "test:server": "npm --prefix server test",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1"
+  }
+}
