@@ -6,7 +6,7 @@ import { ChartGrid } from './components/ChartGrid';
 import { InterpretationTabs } from './components/InterpretationTabs';
 import { HistoryDrawer } from './components/HistoryDrawer';
 import { ExportModal } from './components/ExportModal';
-import { Download, RotateCcw, Share2, Compass } from 'lucide-react';
+import { Download, RotateCcw, Compass, AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Theme state
@@ -26,7 +26,7 @@ export const App: React.FC = () => {
 
   // Export modal state
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
-  const chartMatrixRef = useRef<HTMLDivElement | null>(null);
+  const chartMatrixRef = useRef<HTMLDivElement>(null);
 
   // Apply theme class
   useEffect(() => {
@@ -50,8 +50,8 @@ export const App: React.FC = () => {
             setHistoryList(json.data);
           }
         }
-      } catch (err) {
-        console.warn('Could not load history on mount', err);
+      } catch {
+        // Silently ignore on initial load if server is warming up
       }
     };
     fetchHistory();
@@ -71,8 +71,21 @@ export const App: React.FC = () => {
         body: JSON.stringify(input)
       });
 
+      if (!res.ok) {
+        let errMessage = `Lỗi máy chủ (${res.status})`;
+        try {
+          const errJson = await res.json();
+          if (errJson.error) errMessage = errJson.error;
+        } catch {
+          if (res.status === 502 || res.status === 504 || res.status === 500) {
+            errMessage = 'Không thể kết nối đến máy chủ Backend (Port 5000). Vui lòng đảm bảo Backend đang chạy (gõ lệnh "npm run server" hoặc "npm run dev").';
+          }
+        }
+        throw new Error(errMessage);
+      }
+
       const json = await res.json();
-      if (!res.ok || !json.success) {
+      if (!json.success) {
         throw new Error(json.error || 'Lỗi khi lập lá số');
       }
 
@@ -91,7 +104,11 @@ export const App: React.FC = () => {
         document.getElementById('chart-section')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');
+      let msg = err.message || 'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
+      if (err.name === 'SyntaxError' || msg.includes('Unexpected end of JSON')) {
+        msg = 'Chưa kết nối được với Backend Server (Port 5000). Vui lòng kiểm tra Terminal đã chạy lệnh "npm run server" (hoặc "npm run dev") chưa!';
+      }
+      setErrorMsg(msg);
     } finally {
       setIsLoading(false);
     }
@@ -137,8 +154,9 @@ export const App: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           <ChartForm onSubmit={handleGenerateChart} isLoading={isLoading} />
           {errorMsg && (
-            <div className="mt-3 p-3 rounded bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs text-center border border-red-300">
-              {errorMsg}
+            <div className="mt-3 p-3 rounded bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs sm:text-sm border border-red-300 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
             </div>
           )}
         </div>
