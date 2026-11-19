@@ -19,6 +19,7 @@ out/
 # Uploads & local storage
 uploads/
 server/uploads/
+server/data/
 *.log
 
 # Testing & Coverage
