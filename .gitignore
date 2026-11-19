@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Environment variables - NEVER COMMIT
+.env
+.env.*
+!.env.example
+*.env
+server/.env
+client/.env
+
+# Build & Dist
+dist/
+build/
+out/
+
+# Uploads & local storage
+uploads/
+server/uploads/
+*.log
+
+# Testing & Coverage
+playwright-report/
+test-results/
+coverage/
+.nyc_output/
+
+# Editor & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
