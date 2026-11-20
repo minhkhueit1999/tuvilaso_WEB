@@ -1,7 +1,7 @@
 import { ElementType, Gender } from './types.js';
 
 // Ngũ Hành Nạp Âm cho 60 Hoa Giáp
-const NAP_AM: Record<string, { menh: string; element: ElementType }> = {
+export const NAP_AM: Record<string, { menh: string; element: ElementType }> = {
   'Giáp Tý': { menh: 'Hải Trung Kim', element: 'Kim' },
   'Ất Sửu': { menh: 'Hải Trung Kim', element: 'Kim' },
   'Bính Dần': { menh: 'Lư Trung Hỏa', element: 'Hoa' },
@@ -136,4 +136,6 @@ export function calculateCuc(canYear: string, menhChiIndex: number): CucInfo {
       return { name: 'Thủy Nhị Cục', number: 2, element: 'Thuy' };
   }
 }
+
+export const NGU_HANH_NAP_AM = NAP_AM;
 

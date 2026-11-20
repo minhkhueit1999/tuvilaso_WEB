@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import multer from 'multer';
 import { generateTuViChart, answerTuViQuestion, TuViInput } from './engine/tuvi/index.js';
+import { calculateSynastry } from './engine/tuvi/synastry.js';
 import {
   getDatabaseStatus,
   saveChartRecord,
@@ -120,6 +121,27 @@ app.post('/api/laso/ask', (req: Request, res: Response, next: NextFunction) => {
     }
 
     const result = answerTuViQuestion(chart, question, selectedPalaceName, school || chart.school);
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// 3b. Synastry (Hợp Bàn Chồng Lá Số - Phi Tinh Hợp Hôn & Hợp Tác)
+app.post('/api/laso/synastry', (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { chartA, chartB, purpose } = req.body;
+    if (!chartA || !chartB) {
+      res.status(400).json({
+        success: false,
+        error: 'Vui lòng cung cấp đủ thông tin lá số của cả hai người.'
+      });
+      return;
+    }
+    const result = calculateSynastry(chartA, chartB, purpose || 'marriage');
     res.status(200).json({
       success: true,
       data: result

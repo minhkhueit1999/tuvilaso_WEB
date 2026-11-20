@@ -4,23 +4,30 @@ import {
   IconSachCo,
   IconAnTrien,
   IconLaKinh,
-  IconThaiCuc
+  IconThaiCuc,
+  IconBatQuai
 } from './OrientalIcons';
+import { BaZiSummaryTab } from './BaZiSummaryTab';
+import { LifeKLineTab } from './LifeKLineTab';
+import { PersonalCalendarTab } from './PersonalCalendarTab';
+import { Compass, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 
 interface InterpretationTabsProps {
   chart: ChartData;
   selectedPalaceId: number;
   onSelectPalace: (palaceId: number) => void;
   activeSchool?: TuViSchool;
+  brandName?: string;
 }
 
 export const InterpretationTabs: React.FC<InterpretationTabsProps> = ({
   chart,
   selectedPalaceId,
   onSelectPalace,
-  activeSchool = 'tong_hop'
+  activeSchool = 'tong_hop',
+  brandName = 'Tử Vi Minh Khuê'
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'palaces' | 'luck'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'palaces' | 'luck' | 'bazi' | 'kline' | 'calendar'>('overview');
 
   const { interpretation, palaces, tamPhuongTuChinh } = chart;
   const currentPalace = palaces.find((p) => p.id === selectedPalaceId) || palaces[0];
@@ -74,6 +81,42 @@ export const InterpretationTabs: React.FC<InterpretationTabsProps> = ({
         >
           <IconLaKinh className="w-4 h-4 text-paper-gold dark:text-night-gold" />
           <span>Luận Vận Hạn Năm {chart.thienBan.viewingYear}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('bazi')}
+          className={`flex items-center gap-2 py-3 px-3 sm:px-5 font-serif text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+            activeTab === 'bazi'
+              ? 'border-paper-red text-paper-red dark:border-night-gold dark:text-night-gold bg-paper-card dark:bg-night-card'
+              : 'border-transparent text-paper-muted dark:text-night-muted hover:text-paper-text dark:hover:text-night-text'
+          }`}
+        >
+          <Compass className="w-4 h-4 text-paper-gold dark:text-night-gold" />
+          <span>Bát Tự Phụ Trợ</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('kline')}
+          className={`flex items-center gap-2 py-3 px-3 sm:px-5 font-serif text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+            activeTab === 'kline'
+              ? 'border-paper-red text-paper-red dark:border-night-gold dark:text-night-gold bg-paper-card dark:bg-night-card'
+              : 'border-transparent text-paper-muted dark:text-night-muted hover:text-paper-text dark:hover:text-night-text'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 text-paper-gold dark:text-night-gold" />
+          <span>Biểu Đồ K-Line</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`flex items-center gap-2 py-3 px-3 sm:px-5 font-serif text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+            activeTab === 'calendar'
+              ? 'border-paper-red text-paper-red dark:border-night-gold dark:text-night-gold bg-paper-card dark:bg-night-card'
+              : 'border-transparent text-paper-muted dark:text-night-muted hover:text-paper-text dark:hover:text-night-text'
+          }`}
+        >
+          <CalendarIcon className="w-4 h-4 text-paper-gold dark:text-night-gold" />
+          <span>Lịch Vận Hạn</span>
         </button>
       </div>
 
@@ -279,6 +322,35 @@ export const InterpretationTabs: React.FC<InterpretationTabsProps> = ({
                 )}
               </div>
 
+              {/* Nhị Hợp (Ám Hợp) Quick Badge */}
+              {(() => {
+                const nhiHopId = chart.nhiHopMap
+                  ? chart.nhiHopMap[currentPalace.id]
+                  : [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2][currentPalace.id];
+                const nhiHopP = palaces.find((p) => p.id === nhiHopId);
+                return (
+                  <div className="mb-3 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-l-2 border-emerald-600 text-xs flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <span className="font-serif font-bold text-emerald-800 dark:text-emerald-300">
+                        Cung Nhị Hợp (Ám Hợp): {nhiHopP?.name} tại {nhiHopP?.branch}
+                      </span>
+                      <p className="text-2xs text-paper-text dark:text-night-text mt-0.5">
+                        Ám hợp mang năng lượng hỗ trợ ngầm, quý nhân trợ lực không lộ diện hoặc mối liên kết nghiệp duyên sâu kín.
+                      </p>
+                    </div>
+                    {nhiHopP && (
+                      <button
+                        type="button"
+                        onClick={() => onSelectPalace(nhiHopP.id)}
+                        className="px-2 py-0.5 text-2xs font-serif font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-600/50 hover:bg-emerald-600/10 cursor-pointer"
+                      >
+                        Chuyển sang {nhiHopP.name} →
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* Interpretation body */}
               <div className="text-xs sm:text-sm space-y-3 leading-relaxed">
                 <p>{interpretation.palaces[currentPalace.name] || 'Đang cập nhật phân tích cung...'}</p>
@@ -346,6 +418,38 @@ export const InterpretationTabs: React.FC<InterpretationTabsProps> = ({
               </h4>
               <p className="text-xs sm:text-sm italic leading-relaxed">{interpretation.luckFortune.advice}</p>
             </div>
+          </div>
+        )}
+
+        {/* TAB 4: BÁT TỰ PHỤ TRỢ */}
+        {activeTab === 'bazi' && (
+          <div className="animate-fadeIn">
+            <BaZiSummaryTab baziData={chart.bazi} />
+          </div>
+        )}
+
+        {/* TAB 5: BIỂU ĐỒ LIFE K-LINE */}
+        {activeTab === 'kline' && (
+          <div className="animate-fadeIn">
+            <LifeKLineTab
+              klineData={chart.kline}
+              onSelectDecade={(decade) => {
+                // Find matching palace for this decade
+                const p = palaces.find(pl => {
+                  const dh = pl.daiHan ?? 0;
+                  return decade >= dh && decade < dh + 10;
+                });
+                if (p) onSelectPalace(p.id);
+              }}
+              brandName={brandName}
+            />
+          </div>
+        )}
+
+        {/* TAB 6: LỊCH VẬN HẠN CÁ NHÂN */}
+        {activeTab === 'calendar' && (
+          <div className="animate-fadeIn">
+            <PersonalCalendarTab calendarData={chart.calendar} />
           </div>
         )}
       </div>

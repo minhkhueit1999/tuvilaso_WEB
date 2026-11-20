@@ -15,6 +15,9 @@ import { CustomRulesetDrawer } from './components/CustomRulesetDrawer';
 import { CrmClientDrawer } from './components/CrmClientDrawer';
 import { WhiteLabelModal, MasterBrandConfig } from './components/WhiteLabelModal';
 import { BirthHourRectification } from './components/BirthHourRectification';
+import { SynastryView } from './components/SynastryView';
+import { RadarFormationsPanel } from './components/RadarFormationsPanel';
+import { BookExportModal } from './components/BookExportModal';
 import { generateTuViChart } from './engine';
 import { safeJsonFetch } from './utils/api';
 import { Download, RotateCcw, AlertCircle } from 'lucide-react';
@@ -60,8 +63,8 @@ export const App: React.FC = () => {
     return localStorage.getItem('tuvi_theme') === 'dark';
   });
 
-  // Navigation View State ('chart' | 'rectification')
-  const [currentView, setCurrentView] = useState<'chart' | 'rectification'>('chart');
+  // Navigation View State ('chart' | 'rectification' | 'synastry')
+  const [currentView, setCurrentView] = useState<'chart' | 'rectification' | 'synastry'>('chart');
 
   // Chart data state
   const [chart, setChart] = useState<ChartData | null>(null);
@@ -70,6 +73,8 @@ export const App: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [currentSchool, setCurrentSchool] = useState<TuViSchool>('tong_hop');
   const [lastInput, setLastInput] = useState<TuViInput | null>(null);
+  const [highlightedPalaceIds, setHighlightedPalaceIds] = useState<number[]>([]);
+  const [isBookExportOpen, setIsBookExportOpen] = useState<boolean>(false);
 
   // Master's Studio State
   const [isPrivacyMode, setIsPrivacyMode] = useState<boolean>(false);
@@ -297,12 +302,20 @@ export const App: React.FC = () => {
         onOpenRuleset={() => setIsRulesetOpen(true)}
         onOpenCrm={() => setIsCrmOpen(true)}
         onOpenWhiteLabel={() => setIsWhiteLabelOpen(true)}
+        onOpenSynastry={() => setCurrentView('synastry')}
+        onOpenBookExport={() => setIsBookExportOpen(true)}
         historyCount={historyList.length}
       />
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        {currentView === 'rectification' ? (
+        {currentView === 'synastry' ? (
+          /* View: Hợp Bàn Chồng Lá Số */
+          <SynastryView
+            currentChart={chart}
+            onBackToMain={() => setCurrentView('chart')}
+          />
+        ) : currentView === 'rectification' ? (
           /* View: Định Giờ Sinh Thông Minh */
           <BirthHourRectification
             initialInput={lastInput || DEFAULT_INPUT}
@@ -405,6 +418,14 @@ export const App: React.FC = () => {
                   </div>
                 </div>
 
+                {/* 3b. Radar 60+ Cách Cục & Cảnh Báo Trùng Phùng */}
+                <RadarFormationsPanel
+                  formations={chart.radar?.formations}
+                  trungPhungAlerts={chart.radar?.trungPhungAlerts}
+                  onHighlightPalaces={(ids) => setHighlightedPalaceIds(ids)}
+                  selectedHighlightedPalaces={highlightedPalaceIds}
+                />
+
                 {/* 4. 4x4 Grid Matrix with SVG Tam Phương Tứ Chính / Phi Tinh & Whiteboard */}
                 <ChartGrid
                   chart={chart}
@@ -420,14 +441,16 @@ export const App: React.FC = () => {
                   brandConfig={brandConfig}
                   isWhiteboardActive={isWhiteboardActive}
                   onCloseWhiteboard={() => setIsWhiteboardActive(false)}
+                  highlightedPalaceIds={highlightedPalaceIds}
                 />
 
-                {/* 5. 3 Tabs Luận Giải */}
+                {/* 5. 6 Tabs Luận Giải & Đồ Thị K-Line, Bát Tự, Lịch Hạn */}
                 <InterpretationTabs
                   chart={chart}
                   selectedPalaceId={selectedPalaceId}
                   onSelectPalace={(id) => setSelectedPalaceId(id)}
                   activeSchool={currentSchool}
+                  brandName={brandConfig.brandName}
                 />
 
                 {/* 6. Hộp Tư Vấn Tử Vi Minh Khuê (AI Assistant) */}
@@ -518,6 +541,14 @@ export const App: React.FC = () => {
           chartName={isPrivacyMode ? 'Duong_So_An_Danh' : chart.thienBan.fullName}
         />
       )}
+
+      {/* Book Export PDF Modal (Thiên Thư Mệnh Lý) */}
+      <BookExportModal
+        isOpen={isBookExportOpen}
+        onClose={() => setIsBookExportOpen(false)}
+        chart={chart}
+        brandConfig={brandConfig}
+      />
     </div>
   );
 };

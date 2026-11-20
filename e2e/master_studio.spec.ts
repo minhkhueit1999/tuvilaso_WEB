@@ -113,7 +113,7 @@ test.describe("Master's Studio - Cụm Tính Năng Chuyên Sâu Cho Thầy Tử 
 
     // Verify CRM drawer header
     await expect(page.getByText(/Hồ Sơ Khách Hàng/i).first()).toBeVisible();
-    await expect(page.getByText('Tất cả')).toBeVisible();
+    await expect(page.locator('aside[aria-label="Sổ Khách Hàng CRM"]').getByRole('button', { name: 'Tất cả', exact: true })).toBeVisible();
 
     // Close CRM Drawer
     await page.locator('button[aria-label="Đóng CRM"]').click();

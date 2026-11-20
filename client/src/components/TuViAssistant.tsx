@@ -7,6 +7,7 @@ import {
   IconMeanderCorner
 } from './OrientalIcons';
 import { answerTuViQuestion } from '../engine';
+import { safeJsonFetch } from '../utils/api';
 
 interface TuViAssistantProps {
   chart: ChartData;
@@ -42,7 +43,7 @@ export const TuViAssistant: React.FC<TuViAssistantProps> = ({ chart, selectedPal
     try {
       let data: any = null;
       try {
-        const res = await fetch('/api/laso/ask', {
+        const res = await safeJsonFetch<{ success: boolean; data: any }>('/api/laso/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -53,12 +54,8 @@ export const TuViAssistant: React.FC<TuViAssistantProps> = ({ chart, selectedPal
           })
         });
 
-        if (res.ok) {
-          const text = await res.text();
-          const json = text ? JSON.parse(text) : null;
-          if (json && json.success && json.data) {
-            data = json.data;
-          }
+        if (res.ok && res.data?.success && res.data.data) {
+          data = res.data.data;
         }
       } catch {
         // Backend offline, fallback to in-browser engine below

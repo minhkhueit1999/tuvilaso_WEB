@@ -20,6 +20,8 @@ interface HeaderProps {
   onOpenRuleset?: () => void;
   onOpenCrm?: () => void;
   onOpenWhiteLabel?: () => void;
+  onOpenSynastry?: () => void;
+  onOpenBookExport?: () => void;
   historyCount: number;
 }
 
@@ -33,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenRuleset,
   onOpenCrm,
   onOpenWhiteLabel,
+  onOpenSynastry,
+  onOpenBookExport,
   historyCount
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -92,6 +96,24 @@ export const Header: React.FC<HeaderProps> = ({
             <IconQuatGiay className="w-3.5 h-3.5" />
             <span>Kho Lá Số Mẫu</span>
           </button>
+          {onOpenSynastry && (
+            <button
+              onClick={onOpenSynastry}
+              className="px-3 py-1.5 rounded-none flex items-center gap-1.5 hover:text-paper-red dark:hover:text-night-gold hover:bg-paper-red/5 dark:hover:bg-night-gold/10 transition-colors text-paper-red dark:text-night-gold font-bold cursor-pointer"
+            >
+              <IconBatQuai className="w-3.5 h-3.5 text-paper-gold" />
+              <span>Hợp Bàn</span>
+            </button>
+          )}
+          {onOpenBookExport && (
+            <button
+              onClick={onOpenBookExport}
+              className="px-3 py-1.5 rounded-none flex items-center gap-1.5 hover:text-paper-red dark:hover:text-night-gold hover:bg-paper-red/5 dark:hover:bg-night-gold/10 transition-colors cursor-pointer"
+            >
+              <IconSachCo className="w-3.5 h-3.5 text-paper-red dark:text-night-gold" />
+              <span>Thiên Thư PDF</span>
+            </button>
+          )}
           {onOpenRectification && (
             <button
               onClick={onOpenRectification}
@@ -194,6 +216,30 @@ export const Header: React.FC<HeaderProps> = ({
             <IconQuatGiay className="w-4 h-4" />
             <span>Kho Lá Số Mẫu</span>
           </button>
+          {onOpenSynastry && (
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenSynastry();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 px-2 hover:bg-paper-cardAlt rounded-none text-paper-red dark:text-night-gold font-bold"
+            >
+              <IconBatQuai className="w-4 h-4 text-paper-gold" />
+              <span>Hợp Bàn Phi Tinh</span>
+            </button>
+          )}
+          {onOpenBookExport && (
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenBookExport();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 px-2 hover:bg-paper-cardAlt rounded-none text-paper-text dark:text-night-text"
+            >
+              <IconSachCo className="w-4 h-4 text-paper-red" />
+              <span>Thiên Thư PDF</span>
+            </button>
+          )}
           {onOpenRectification && (
             <button
               onClick={() => {

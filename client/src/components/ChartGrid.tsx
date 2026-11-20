@@ -23,6 +23,7 @@ interface ChartGridProps {
   brandConfig?: MasterBrandConfig | null;
   isWhiteboardActive?: boolean;
   onCloseWhiteboard?: () => void;
+  highlightedPalaceIds?: number[];
 }
 
 export const ChartGrid: React.FC<ChartGridProps> = ({
@@ -38,9 +39,11 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
   isPrivacyMode = false,
   brandConfig = null,
   isWhiteboardActive = false,
-  onCloseWhiteboard = () => {}
+  onCloseWhiteboard = () => {},
+  highlightedPalaceIds = []
 }) => {
   const [copied, setCopied] = useState(false);
+  const [showNhiHop, setShowNhiHop] = useState(false);
   const { thienBan, palaces, tamPhuongTuChinh, phiHoaTable } = chart;
   const currentSchool: TuViSchool = activeSchool || chart.school || 'tong_hop';
 
@@ -80,6 +83,13 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
   const pXungChieu = getCenterCoord(xungChieuPalace?.position);
   const pTamHop1 = getCenterCoord(tamHop1Palace?.position);
   const pTamHop2 = getCenterCoord(tamHop2Palace?.position);
+
+  // Nhị Hợp (Ám Hợp) Target Palace
+  const nhiHopTargetId = chart.nhiHopMap
+    ? chart.nhiHopMap[selectedPalaceId]
+    : [1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2][selectedPalaceId] ?? ((selectedPalaceId + 6) % 12);
+  const nhiHopPalace = palaces.find((p) => p.id === nhiHopTargetId);
+  const pNhiHop = getCenterCoord(nhiHopPalace?.position);
 
   // Phi Tinh Coordinates for selected palace
   const activePhiDetail = phiHoaTable?.[selectedPalaceId];
@@ -146,6 +156,20 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
             <span>{copied ? 'Đã sao chép!' : 'Sao chép tóm tắt'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowNhiHop(!showNhiHop)}
+            className={`flex items-center gap-1 px-2.5 py-1.5 border text-xs font-serif transition-colors cursor-pointer rounded-none ${
+              showNhiHop
+                ? 'border-emerald-700 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-bold'
+                : 'border-paper-border dark:border-night-border text-paper-muted hover:border-paper-gold'
+            }`}
+            title="Bật/Tắt đường nối Cung Nhị Hợp (Ám Hợp) trong phong thủy mệnh lý"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block" />
+            <span>Nhị Hợp (Ám Hợp)</span>
           </button>
 
           <button
@@ -280,6 +304,23 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   strokeDasharray="1.2,1.2"
                 />
                 <circle cx={pActive.x} cy={pActive.y} r="0.9" fill="#1C1915" stroke="#9A7B3E" strokeWidth="0.25" opacity="0.8" />
+              </g>
+            )}
+
+            {/* 3. Mode: Nhị Hợp (Ám Hợp) -> Đường nối đứt nét Thanh Ngọc (#245B43) */}
+            {showNhiHop && nhiHopPalace && (
+              <g className="transition-all duration-300">
+                <line
+                  x1={pActive.x}
+                  y1={pActive.y}
+                  x2={pNhiHop.x}
+                  y2={pNhiHop.y}
+                  stroke="#245B43"
+                  strokeWidth="0.4"
+                  strokeDasharray="1.5,1.5"
+                />
+                <circle cx={pActive.x} cy={pActive.y} r="0.8" fill="#245B43" opacity="0.85" />
+                <circle cx={pNhiHop.x} cy={pNhiHop.y} r="0.8" fill="#245B43" opacity="0.85" />
               </g>
             )}
           </svg>
@@ -423,6 +464,8 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                 const isPhiKhoa = currentSchool === 'phi_tinh' && activePhiDetail?.khoa?.toPalaceId === cell.id;
                 const isPhiKy = currentSchool === 'phi_tinh' && activePhiDetail?.ky?.toPalaceId === cell.id;
                 const isPhiKyXung = currentSchool === 'phi_tinh' && activePhiDetail?.ky?.xungPalaceId === cell.id;
+                const isNhiHopTarget = showNhiHop && cell.id === nhiHopTargetId;
+                const isRadarHighlighted = highlightedPalaceIds?.includes(cell.id);
 
                 const displaySatStars = showLuuNien
                   ? cell.satStars
@@ -437,6 +480,10 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                     className={`relative p-2 bg-paper-card dark:bg-night-card transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
                       isSelected
                         ? 'ring-2 ring-paper-red dark:ring-night-gold bg-paper-cardAlt dark:bg-night-cardAlt z-20 shadow-sm'
+                        : isRadarHighlighted
+                        ? 'ring-2 ring-paper-gold bg-amber-500/15 dark:bg-night-gold/20 z-10'
+                        : isNhiHopTarget
+                        ? 'ring-2 ring-emerald-600 bg-emerald-100/30 dark:bg-emerald-950/25 z-10'
                         : isPhiKy
                         ? 'ring-1 ring-paper-red bg-red-100/40 dark:bg-red-950/30'
                         : isPhiLoc

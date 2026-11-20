@@ -203,3 +203,18 @@ export function calculateLuuNguyet(chiYearIndex: number, lunarMonth: number, chi
   }
   return res;
 }
+
+// 6 Cặp Nhị Hợp (Lục Hợp / Ám Hợp)
+export const NHI_HOP_PAIRS: Record<number, number> = {
+  0: 1, 1: 0,   // Tý - Sửu
+  2: 11, 11: 2, // Dần - Hợi
+  3: 10, 10: 3, // Mão - Tuất
+  4: 9, 9: 4,   // Thìn - Dậu
+  5: 8, 8: 5,   // Tỵ - Thân
+  6: 7, 7: 6    // Ngọ - Mùi
+};
+
+export function getNhiHopPalaceId(palaceId: number): number {
+  return NHI_HOP_PAIRS[palaceId] ?? ((palaceId + 6) % 12);
+}
+

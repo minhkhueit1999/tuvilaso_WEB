@@ -116,7 +116,7 @@ export const CrmClientDrawer: React.FC<CrmClientDrawerProps> = ({
         chartData: currentChart
       };
 
-      const res = await fetch('/api/crm/charts', {
+      const res = await safeJsonFetch('/api/crm/charts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(record)
@@ -163,7 +163,7 @@ export const CrmClientDrawer: React.FC<CrmClientDrawerProps> = ({
   const handleDeleteClient = async (clientId: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa hồ sơ khách hàng này không?')) return;
     try {
-      const res = await fetch(`/api/crm/charts/${clientId}`, { method: 'DELETE' });
+      const res = await safeJsonFetch(`/api/crm/charts/${clientId}`, { method: 'DELETE' });
       if (res.ok) {
         setSelectedClient(null);
         fetchClients();
@@ -173,7 +173,8 @@ export const CrmClientDrawer: React.FC<CrmClientDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div
+      <aside
+        aria-label="Sổ Khách Hàng CRM"
         className="w-full max-w-4xl bg-paper-card dark:bg-night-card border-l-2 border-paper-gold/80 dark:border-night-gold/80 h-full overflow-hidden flex flex-col shadow-2xl relative rounded-none"
         onClick={(e) => e.stopPropagation()}
       >
@@ -538,7 +539,7 @@ export const CrmClientDrawer: React.FC<CrmClientDrawerProps> = ({
             )}
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   );
 };

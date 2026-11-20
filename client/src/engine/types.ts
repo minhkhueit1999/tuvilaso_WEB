@@ -176,6 +176,12 @@ export interface ChartData {
   interpretation: Interpretation;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
+  radar?: any;
+  bazi?: any;
+  kline?: any;
+  calendar?: any;
+  nhiHopMap?: Record<number, number>;
+  vanHan?: any;
 }
 
 export type CanhVariant = 'vn_standard' | 'toan_thu' | 'bac_phai_alt';

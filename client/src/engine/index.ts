@@ -42,6 +42,11 @@ import {
   getTuHoaTable
 } from './stars.js';
 import { generateInterpretation, answerTuViQuestion } from './interpreter.js';
+import { detectAllFormations } from './radar';
+import { calculateBazi } from './battu';
+import { generateLifeKline } from './kline';
+import { generatePersonalCalendar } from './calendar';
+import { NHI_HOP_PAIRS } from './palaces';
 
 export * from './types.js';
 export { answerTuViQuestion };
@@ -324,6 +329,12 @@ export function generateTuViChart(input: TuViInput): ChartData {
   // 17. Sinh Luận Giải Động theo trường phái
   const interpretation = generateInterpretation(thienBan, palaces, tamPhuongTuChinh, viewingYear, school, ruleset);
 
+  // 18. Tính toán Cụm Tính Năng Học Thuật Chuyên Sâu (Stage 2)
+  const radar = detectAllFormations(palaces, tamPhuongTuChinh, canChi.canYear);
+  const bazi = calculateBazi(solarYear, solarMonth, solarDay, hour, minute);
+  const kline = generateLifeKline(palaces, cuc.number, currentAge);
+  const calendar = generatePersonalCalendar(palaces, viewingYear, canChi.chiYear, lunarMonth, chiHourIndex);
+
   return {
     createdAt: new Date().toISOString(),
     school,
@@ -336,6 +347,11 @@ export function generateTuViChart(input: TuViInput): ChartData {
     phiHoaTable,
     interpretation,
     showTamPhuongTuChinh,
-    showLuuNien
+    showLuuNien,
+    radar,
+    bazi,
+    kline,
+    calendar,
+    nhiHopMap: NHI_HOP_PAIRS
   };
 }
