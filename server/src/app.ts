@@ -3,7 +3,21 @@ import cors from 'cors';
 import path from 'path';
 import multer from 'multer';
 import { generateTuViChart, answerTuViQuestion, TuViInput } from './engine/tuvi/index.js';
-import { getDatabaseStatus, saveChartRecord, getRecentChartRecords, getChartRecordById } from './config/db.js';
+import {
+  getDatabaseStatus,
+  saveChartRecord,
+  getRecentChartRecords,
+  getChartRecordById,
+  saveClientChartRecord,
+  getClientChartRecords,
+  getClientChartRecordById,
+  updateClientChartRecord,
+  deleteClientChartRecord,
+  addVerificationNoteRecord,
+  deleteVerificationNoteRecord,
+  getBrandConfigRecord,
+  saveBrandConfigRecord
+} from './config/db.js';
 import { uploadImageBuffer, isCloudinaryConfigured } from './services/storageService.js';
 
 const upload = multer({
@@ -77,7 +91,8 @@ app.post('/api/laso/generate', async (req: Request, res: Response, next: NextFun
       viewingYear: Number(viewingYear ?? 2026),
       school: school || 'tong_hop',
       showTamPhuongTuChinh: showTamPhuongTuChinh ?? true,
-      showLuuNien: showLuuNien ?? true
+      showLuuNien: showLuuNien ?? true,
+      ruleset: req.body.ruleset
     };
 
     const chart = generateTuViChart(input);
@@ -182,6 +197,163 @@ app.post('/api/laso/upload-image', upload.single('image'), async (req: Request, 
         publicId: uploadRes.public_id,
         mode: uploadRes.mode
       }
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// 7. CRM Client Charts API
+app.get('/api/crm/charts', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+    const tag = typeof req.query.tag === 'string' ? req.query.tag : undefined;
+    const records = await getClientChartRecords({ search, tag });
+    res.status(200).json({
+      success: true,
+      count: records.length,
+      data: records
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.post('/api/crm/charts', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { fullName, birthDate } = req.body;
+    if (!fullName || !birthDate) {
+      res.status(400).json({
+        success: false,
+        error: 'Họ tên và ngày sinh khách hàng là bắt buộc.'
+      });
+      return;
+    }
+    const saved = await saveClientChartRecord(req.body);
+    res.status(201).json({
+      success: true,
+      data: saved
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.get('/api/crm/charts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const client = await getClientChartRecordById(id);
+    if (!client) {
+      res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy hồ sơ khách hàng'
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: client
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.put('/api/crm/charts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const updated = await updateClientChartRecord(id, req.body);
+    if (!updated) {
+      res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy hồ sơ khách hàng để cập nhật'
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: updated
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.delete('/api/crm/charts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const deleted = await deleteClientChartRecord(id);
+    res.status(200).json({
+      success: deleted,
+      message: deleted ? 'Đã xóa hồ sơ khách hàng' : 'Không tìm thấy hồ sơ'
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// 8. CRM Verification Notes API
+app.post('/api/crm/charts/:id/notes', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const { year, content } = req.body;
+    if (!year || !content) {
+      res.status(400).json({
+        success: false,
+        error: 'Năm và nội dung nghiệm lý là bắt buộc.'
+      });
+      return;
+    }
+    const note = await addVerificationNoteRecord(id, req.body);
+    if (!note) {
+      res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy hồ sơ khách hàng'
+      });
+      return;
+    }
+    res.status(201).json({
+      success: true,
+      data: note
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.delete('/api/crm/charts/:id/notes/:noteId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const noteId = Array.isArray(req.params.noteId) ? req.params.noteId[0] : req.params.noteId;
+    const deleted = await deleteVerificationNoteRecord(id, noteId);
+    res.status(200).json({
+      success: deleted,
+      message: deleted ? 'Đã xóa ghi chú nghiệm lý' : 'Không tìm thấy ghi chú'
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// 9. White-Label & Brand Config API
+app.get('/api/crm/brand', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const brand = await getBrandConfigRecord();
+    res.status(200).json({
+      success: true,
+      data: brand
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+app.post('/api/crm/brand', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const saved = await saveBrandConfigRecord(req.body);
+    res.status(200).json({
+      success: true,
+      data: saved
     });
   } catch (error: any) {
     next(error);

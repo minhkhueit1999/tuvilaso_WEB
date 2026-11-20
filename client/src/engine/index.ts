@@ -38,7 +38,8 @@ import {
   calculatePhiHoaTable,
   getChuMenh,
   getChuThan,
-  TU_HOA_TABLE
+  TU_HOA_TABLE,
+  getTuHoaTable
 } from './stars.js';
 import { generateInterpretation, answerTuViQuestion } from './interpreter.js';
 
@@ -59,10 +60,13 @@ export function generateTuViChart(input: TuViInput): ChartData {
     viewingYear = 2026,
     school = 'tong_hop',
     showTamPhuongTuChinh = true,
-    showLuuNien = true
+    showLuuNien = true,
+    ruleset
   } = input;
 
-  // 1. Quy đổi Lịch
+  // 1. Quy đổi Lịch & Tùy biến Giờ Tý (ziHourMode)
+  // 'split_next_day': Giờ Tý 23:00–00:00 (Vãn Tý) tính sang ngày hôm sau
+  // 'keep_current_day': Giữ nguyên ngày cũ
   let solarDay = day;
   let solarMonth = month;
   let solarYear = year;
@@ -70,48 +74,85 @@ export function generateTuViChart(input: TuViInput): ChartData {
   let lunarDay = day;
   let lunarMonth = month;
   let lunarYear = year;
-  let isLeap = isLeapMonth;
+  let isLeap = Boolean(isLeapMonth);
 
   if (calendarType === 'solar') {
+    if (hour === 23 && ruleset?.ziHourMode === 'split_next_day') {
+      const dt = new Date(year, month - 1, day);
+      dt.setDate(dt.getDate() + 1);
+      solarDay = dt.getDate();
+      solarMonth = dt.getMonth() + 1;
+      solarYear = dt.getFullYear();
+    }
     const lDate = solarToLunar(solarDay, solarMonth, solarYear);
     lunarDay = lDate.day;
     lunarMonth = lDate.month;
     lunarYear = lDate.year;
     isLeap = lDate.isLeap;
   } else {
+    if (hour === 23 && ruleset?.ziHourMode === 'split_next_day') {
+      lunarDay = day + 1;
+    }
     const sDate = lunarToSolar(lunarDay, lunarMonth, lunarYear, isLeap);
     solarDay = sDate.day;
     solarMonth = sDate.month;
     solarYear = sDate.year;
   }
 
-  // 2. Can Chi Năm, Tháng, Ngày, Giờ
-  const canChi = getCanChi(solarDay, solarMonth, solarYear, hour, lunarMonth, lunarYear);
+  // 2. Tùy biến Tháng Nhuận (leapMonthMode)
+  // 'previous_month': tính theo tháng trước (mặc định)
+  // 'split_day_15': 1–15 tính tháng trước, 16–30 tính tháng sau
+  // 'next_month': đẩy sang tháng sau
+  let effectiveLunarMonth = lunarMonth;
+  if (isLeap) {
+    if (ruleset?.leapMonthMode === 'next_month') {
+      effectiveLunarMonth = (lunarMonth % 12) + 1;
+    } else if (ruleset?.leapMonthMode === 'split_day_15') {
+      if (lunarDay > 15) {
+        effectiveLunarMonth = (lunarMonth % 12) + 1;
+      }
+    }
+  }
+
+  // 3. Tùy biến Mốc Đổi Năm (yearBoundaryMode)
+  // 'lunar_new_year': Mùng 1 Tết Âm (chuẩn Tử Vi)
+  // 'lichun': Tiết Lập Xuân (4/2 Dương lịch)
+  let effectiveCanYearYear = lunarYear;
+  if (ruleset?.yearBoundaryMode === 'lichun') {
+    if (solarMonth < 2 || (solarMonth === 2 && solarDay < 4)) {
+      effectiveCanYearYear = solarYear - 1;
+    } else {
+      effectiveCanYearYear = solarYear;
+    }
+  }
+
+  // 4. Can Chi Năm, Tháng, Ngày, Giờ
+  const canChi = getCanChi(solarDay, solarMonth, solarYear, hour, effectiveLunarMonth, effectiveCanYearYear);
   const chiYearIndex = CHI_NAMES.indexOf(canChi.chiYear);
   const chiHourIndex = CHI_NAMES.indexOf(canChi.chiHour);
 
-  // 3. Vị trí Cung Mệnh & Thân
-  const { menhIndex, thanIndex } = getMenhThanPosition(lunarMonth, chiHourIndex);
+  // 5. Vị trí Cung Mệnh & Thân
+  const { menhIndex, thanIndex } = getMenhThanPosition(effectiveLunarMonth, chiHourIndex);
 
-  // 4. Âm Dương & Bản Mệnh
+  // 6. Âm Dương & Bản Mệnh
   const amDuongInfo = getAmDuongNamNu(canChi.canYear, gender);
   const banMenhInfo = getNapAm(canChi.canYear, canChi.chiYear);
 
-  // 5. Cục
+  // 7. Cục
   const cuc = calculateCuc(canChi.canYear, menhIndex);
 
-  // 6. Can của 12 Cung (Ngũ Hổ Độn)
+  // 8. Can của 12 Cung (Ngũ Hổ Độn)
   const palaceCanList = getPalaceCanList(canChi.canYear);
 
-  // 7. Đại Hạn & Tiểu Hạn
+  // 9. Đại Hạn & Tiểu Hạn
   const daiHanMap = calculateDaiHan(cuc, amDuongInfo.isThuan, menhIndex);
   const tieuHanMap = calculateTieuHan(canChi.chiYear, gender);
 
-  // 8. An 14 Chính Tinh (kèm Sinh Niên Tứ Hóa A/B/C/D)
+  // 10. An 14 Chính Tinh (kèm Sinh Niên Tứ Hóa A/B/C/D)
   const tuViPos = findTuViPosition(lunarDay, cuc);
-  const rawMajorStarsMap = placeMajorStars(tuViPos, canChi.canYear);
+  const rawMajorStarsMap = placeMajorStars(tuViPos, canChi.canYear, ruleset);
 
-  // 9. An Phụ Tinh, Sao Lưu Niên & Tuần/Triệt (110+ sao)
+  // 11. An Phụ Tinh, Sao Lưu Niên & Tuần/Triệt (110+ sao)
   const {
     catStars: rawCatStars,
     satStars: rawSatStars,
@@ -121,21 +162,23 @@ export function generateTuViChart(input: TuViInput): ChartData {
   } = placeMinorStars(
     canChi.canYear,
     canChi.chiYear,
-    lunarMonth,
+    effectiveLunarMonth,
     lunarDay,
     chiHourIndex,
     cuc,
     amDuongInfo.isThuan,
     viewingYear,
     menhIndex,
-    thanIndex
+    thanIndex,
+    ruleset
   );
 
-  // 10. Tính Tự Hóa Ly Tâm & Hướng Tâm cho toàn bộ các cung
+  // 12. Tính Tự Hóa Ly Tâm & Hướng Tâm cho toàn bộ các cung
   const { updatedMajor: majorStarsMap, updatedMinor } = calculateTuHoaLyHuongTam(
     palaceCanList,
     rawMajorStarsMap,
-    rawMinorStars
+    rawMinorStars,
+    ruleset
   );
 
   // Cập nhật lại catStars và satStars với Tự Hóa
@@ -229,7 +272,7 @@ export function generateTuViChart(input: TuViInput): ChartData {
 
   // 14. Tính Bảng Phi Tinh Tứ Hóa cho 12 Cung
   const palaceNamesList = palaces.map(p => p.name);
-  const phiHoaTable = calculatePhiHoaTable(palaceCanList, palaceNamesList, allStarsLocation);
+  const phiHoaTable = calculatePhiHoaTable(palaceCanList, palaceNamesList, allStarsLocation, ruleset);
 
   // Cung Thân cư ở đâu:
   const thanPalace = palaces.find(p => p.isThan) || palaces[0];
@@ -246,7 +289,8 @@ export function generateTuViChart(input: TuViInput): ChartData {
 
   // 16. Thiên Bàn
   const pad = (n: number) => n.toString().padStart(2, '0');
-  const tuHoaRules = TU_HOA_TABLE[canChi.canYear] || { loc: 'Liêm Trinh', quyen: 'Phá Quân', khoa: 'Vũ Khúc', ky: 'Thái Dương' };
+  const tuHoaTable = getTuHoaTable(ruleset);
+  const tuHoaRules = tuHoaTable[canChi.canYear] || { loc: 'Liêm Trinh', quyen: 'Phá Quân', khoa: 'Vũ Khúc', ky: 'Thái Dương' };
 
   const thienBan: ThienBan = {
     fullName,
@@ -278,11 +322,12 @@ export function generateTuViChart(input: TuViInput): ChartData {
   };
 
   // 17. Sinh Luận Giải Động theo trường phái
-  const interpretation = generateInterpretation(thienBan, palaces, tamPhuongTuChinh, viewingYear, school);
+  const interpretation = generateInterpretation(thienBan, palaces, tamPhuongTuChinh, viewingYear, school, ruleset);
 
   return {
     createdAt: new Date().toISOString(),
     school,
+    ruleset,
     laiNhanPalaceId,
     laiNhanPalaceName: laiNhanPalace.name,
     thienBan,

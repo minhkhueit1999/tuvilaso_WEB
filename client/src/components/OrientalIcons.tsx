@@ -169,3 +169,27 @@ export const IconNguyetThuc: React.FC<IconProps> = ({ className = 'w-4 h-4' }) =
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
+
+// 10. Bút Lông Calligraphy Brush (Họa Bút Whiteboard)
+export const IconButLong: React.FC<IconProps> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25">
+    <path d="M18 2l4 4-10 10-5 1 1-5L18 2z" />
+    <path d="M7 17l-4 4a2 2 0 0 0 3 0l1-1" />
+  </svg>
+);
+
+// 11. Khai Ấn Master CRM Folder
+export const IconKhaiAn: React.FC<IconProps> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    <line x1="12" y1="11" x2="12" y2="17" />
+    <line x1="9" y1="14" x2="15" y2="14" />
+  </svg>
+);
+
+// 12. Chu Sa Cinnabar Ink Drop
+export const IconChuSa: React.FC<IconProps> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25">
+    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+  </svg>
+);

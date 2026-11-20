@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
 import { IconAnTrien } from './OrientalIcons';
+import { safeJsonFetch } from '../utils/api';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
     setIsUploading(true);
     try {
-      const res = await fetch('/api/laso/upload-image', {
+      const res = await safeJsonFetch<{ success: boolean; data?: { url?: string } }>('/api/laso/upload-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,9 +76,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           filename: `laso_${chartName.replace(/\s+/g, '_')}.png`
         })
       });
-      const json = await res.json();
-      if (json.success && json.data?.url) {
-        setCloudUrl(json.data.url);
+      if (res.ok && res.data?.success && res.data?.data?.url) {
+        setCloudUrl(res.data.data.url);
       }
     } catch (err) {
       console.error('Upload error:', err);

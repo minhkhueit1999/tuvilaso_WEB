@@ -166,6 +166,7 @@ export interface ChartData {
   id?: string;
   createdAt: string;
   school?: TuViSchool;
+  ruleset?: TuViRuleset;
   laiNhanPalaceId: number;
   laiNhanPalaceName: string;
   thienBan: ThienBan;
@@ -175,6 +176,30 @@ export interface ChartData {
   interpretation: Interpretation;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
+}
+
+export type CanhVariant = 'vn_standard' | 'toan_thu' | 'bac_phai_alt';
+export type NhamVariant = 'vn_standard' | 'toan_thu';
+export type MauVariant = 'vn_standard' | 'toan_thu';
+export type ZiHourMode = 'split_next_day' | 'keep_current_day';
+export type LeapMonthMode = 'previous_month' | 'split_day_15' | 'next_month';
+export type YearBoundaryMode = 'lunar_new_year' | 'lichun';
+export type KhoiVietVariant = 'vn_standard' | 'bac_phai';
+export type LuuNguyetMethod = 'thai_tue' | 'tieu_han';
+export type SchoolPreset = 'nam_phai_vn' | 'bac_phai_kham_thien' | 'trung_chau' | 'toan_thu' | 'custom';
+
+export interface TuViRuleset {
+  id?: string;
+  name?: string;
+  canhVariant?: CanhVariant;
+  nhamVariant?: NhamVariant;
+  mauVariant?: MauVariant;
+  ziHourMode?: ZiHourMode;
+  leapMonthMode?: LeapMonthMode;
+  yearBoundaryMode?: YearBoundaryMode;
+  khoiVietVariant?: KhoiVietVariant;
+  luuNguyetMethod?: LuuNguyetMethod;
+  schoolPreset?: SchoolPreset;
 }
 
 export interface TuViInput {
@@ -191,4 +216,5 @@ export interface TuViInput {
   school?: TuViSchool;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
+  ruleset?: TuViRuleset;
 }

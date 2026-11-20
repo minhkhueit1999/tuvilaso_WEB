@@ -6,6 +6,8 @@ import {
   IconLaKinh,
   IconMeanderCorner
 } from './OrientalIcons';
+import { MasterBrandConfig, SealStampSVG } from './WhiteLabelModal';
+import { WhiteboardCanvas } from './WhiteboardCanvas';
 
 interface ChartGridProps {
   chart: ChartData;
@@ -17,6 +19,10 @@ interface ChartGridProps {
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
   activeSchool?: TuViSchool;
+  isPrivacyMode?: boolean;
+  brandConfig?: MasterBrandConfig | null;
+  isWhiteboardActive?: boolean;
+  onCloseWhiteboard?: () => void;
 }
 
 export const ChartGrid: React.FC<ChartGridProps> = ({
@@ -28,7 +34,11 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
   chartRef,
   showTamPhuongTuChinh = true,
   showLuuNien = true,
-  activeSchool = 'tong_hop'
+  activeSchool = 'tong_hop',
+  isPrivacyMode = false,
+  brandConfig = null,
+  isWhiteboardActive = false,
+  onCloseWhiteboard = () => {}
 }) => {
   const [copied, setCopied] = useState(false);
   const { thienBan, palaces, tamPhuongTuChinh, phiHoaTable } = chart;
@@ -299,10 +309,10 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                       {/* Header */}
                       <div className="relative z-10 pt-1">
                         <div className="inline-block px-3 py-0.5 text-[10px] sm:text-xs font-serif font-bold text-paper-red dark:text-night-gold border border-paper-red/40 dark:border-night-gold/40 mb-1 tracking-widest">
-                          THIÊN BÀN TỬ VI MINH KHUÊ
+                          THIÊN BÀN TỬ VI {brandConfig?.enabled && brandConfig.brandName ? `• ${brandConfig.brandName.toUpperCase()}` : 'MINH KHUÊ'}
                         </div>
                         <h3 className="font-serif text-lg sm:text-2xl font-bold text-paper-text dark:text-night-text tracking-wide">
-                          {thienBan.fullName}
+                          {isPrivacyMode ? 'Đương Số (Ẩn Danh)' : thienBan.fullName}
                         </h3>
                         <p className="text-[11px] sm:text-xs text-paper-gold dark:text-night-gold font-medium mt-0.5">
                           {thienBan.gender} • {thienBan.amDuong} ({thienBan.amDuongLy})
@@ -313,11 +323,15 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                       <div className="relative z-10 text-[10px] sm:text-xs text-paper-muted dark:text-night-muted space-y-1 my-1.5 border-y border-paper-border/70 dark:border-night-border/70 py-2">
                         <div className="flex justify-between px-2">
                           <span className="font-serif">Dương Lịch:</span>
-                          <span className="font-medium text-paper-text dark:text-night-text tabular-nums">{thienBan.solarDate}</span>
+                          <span className="font-medium text-paper-text dark:text-night-text tabular-nums">
+                            {isPrivacyMode ? `**/**/${thienBan.solarDate.split('/').pop() || 'YYYY'}` : thienBan.solarDate}
+                          </span>
                         </div>
                         <div className="flex justify-between px-2">
                           <span className="font-serif">Âm Lịch:</span>
-                          <span className="font-medium text-paper-text dark:text-night-text tabular-nums">{thienBan.lunarDate}</span>
+                          <span className="font-medium text-paper-text dark:text-night-text tabular-nums">
+                            {isPrivacyMode ? `**/**/${thienBan.lunarDate.split('/').pop() || 'YYYY'}` : thienBan.lunarDate}
+                          </span>
                         </div>
                         <div className="flex justify-between px-2">
                           <span className="font-serif">Giờ Sinh:</span>
@@ -342,6 +356,13 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                           </span>
                         </div>
                       </div>
+
+                      {/* Cinnabar Seal Stamp & Brand Info if Enabled */}
+                      {brandConfig?.enabled && (
+                        <div className="absolute bottom-2 right-2 z-20 pointer-events-none opacity-85">
+                          <SealStampSVG text={brandConfig.sealText || 'THẦY'} className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xs" />
+                        </div>
+                      )}
 
                       {/* Tứ Hóa & Mệnh Cục Footer */}
                       <div className="relative z-10 space-y-1">
@@ -579,6 +600,13 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
               })
             )}
           </div>
+
+          {/* Họa Bút Whiteboard Canvas Overlay */}
+          <WhiteboardCanvas
+            isActive={!!isWhiteboardActive}
+            chartContainerId="tuvi-laso-matrix"
+            onClose={onCloseWhiteboard}
+          />
         </div>
       </div>
 

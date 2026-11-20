@@ -1,44 +1,134 @@
-# Kế Hoạch Hiện Thực Hóa: Tử Vi Minh Khuê — Cổ Tịch Trung Hoa & 110+ Sao
+# Implementation Plan: Stage 1 - Master's Studio for Tu Vi Practitioners
 
-## 1. Mục Tiêu Tổng Thể
-Nâng cấp toàn diện ứng dụng **Tử Vi Minh Khuê** theo chuẩn:
-- **Thẩm mỹ Cổ Tịch Trung Hoa (Sách Mộc Bản & Thư Pháp Tống–Minh)**: Triết lý Lưu Bạch, Giấy Tuyên Chỉ & Sơn Mài Huyền Dạ, Khung Song Biên (Double-line Frame), Con Dấu Ấn Triện (Red Seal Stamp), Họa Tiết Hồi Văn (Meander Corner), tuyệt đối không dùng Emoji, không gradient tím/xanh neon SaaS, không bo góc tròn to (`rounded-none` hoặc `rounded-[2px]`).
-- **Engine Tử Vi 110+ Sao Đầy Đủ**: 14 Chính Tinh (kèm `+`/`-`, Ngũ Hành, Miếu/Vượng/Đắc/Bình/Hãm), Lục Cát & Lục Sát, Vòng Bác Sĩ (12 sao), Vòng Thái Tuế (12 sao), Vòng Tràng Sinh (12 sao), Hệ phụ tinh theo Năm/Tháng/Ngày/Giờ (Thiên Hình, Thiên Riêu, Đẩu Quân, Tam Thai, Bát Tọa, Ân Quang, Thiên Quý...), Sao Lưu Niên, Tuần/Triệt.
-- **Bố Cục 3 Tầng Cho Từng Ô Cung**:
-  * Tầng 1 (Header): Can Chi viết tắt, Âm/Dương Ngũ Hành chi, Tên Cung HOA đậm + Con dấu Ấn Triện (THÂN / LAI NHÂN), Chính tinh (màu ngũ hành), Tuổi Đại Vận, Lưu Nguyệt (`Th.1`..`Th.12`).
-  * Tầng 2 (Thân cung): 2 cột phụ tinh thẳng tắp (Trái: Cát tinh + Lưu Cát; Phải: Sát tinh + Lưu Sát; Ký hiệu Tứ Hóa `A/B/C/D`, Tự Hóa `↑/↓`).
-  * Tầng 3 (Footer): Đại Vận (`ĐV.MỆNH`..), Vòng Tràng Sinh (đậm), Lưu Niên (`LN.MỆNH`..).
-  * Tuần/Triệt: Dấu chữ nhật Đen Mực chữ trắng trên đường giáp ranh.
-- **4 Trường Phái (School Switcher)**:
-  1. **Tổng Hợp**: 110+ sao + Tứ Hóa Tiên Thiên + Tự Hóa + Lai Nhân Cung + Tam Phương Tứ Chính + Tóm tắt Phi Hóa.
-  2. **Nam Phái**: Thuần 110+ sao, Tam Phương Tứ Chính, ẩn ký hiệu Bắc Phái, luận giải theo Cách Cục kinh điển.
-  3. **Bắc Phái**: 18 sao Tứ Hóa, đóng dấu LAI NHÂN CUNG, Sinh Niên Tứ Hóa (`A/B/C/D`), Tự Hóa Ly Tâm (`↑`) & Hướng Tâm (`↓`), bảng đối chiếu Thập Thiên Can.
-  4. **Phi Tinh**: Click cung vẽ 4 đường SVG mũi tên (Phi Lộc `#245B43`, Phi Quyền `#C27803`, Phi Khoa `#234B6E`, Phi Kỵ `#9E2A22` + nét đứt xung chiếu), kèm bảng giải mã thời gian thực.
-- **Chất Lượng & Độ Ổn Định**:
-  * `npm run build` 0 lỗi TypeScript ở cả `/server` và `/client`.
-  * Bộ test Playwright E2E 100% PASS (Desktop + Mobile).
-  * Push sạch lên GitHub `origin/main`.
+Xây dựng cụm 5 tính năng chuyên sâu chuẩn mực cho giới Thầy Tử Vi trên nền tảng `tuvilaso_WEB` theo ngôn ngữ thiết kế Cổ Tịch Trung Hoa (Tuyên Chỉ / Sơn Mài / Song Biên / Ấn Triện / Không AI-slop).
 
-## 2. Các Bước Triển Khai
-1. **Engine Backend & Shared Engine (`/server/src/engine/tuvi/` & `/client/src/engine/`)**:
-   - Mở rộng `types.ts` với đầy đủ schemas: `TuViSchool`, `Star` (110+ sao, `weight`, `side`, `sinhNienHoa`, `tuHoaLyTam`, `tuHoaHuongTam`), `PhiHoaDetail`, `LaiNhanCung`, `LuuNguyet`.
-   - Cập nhật `stars.ts`: Bổ sung toàn bộ Vòng Bác Sĩ (12 sao theo chiều âm dương nam nữ), Phụ tinh Năm/Tháng/Ngày/Giờ, Lưu Niên 15 sao, tính Tự Hóa Ly Tâm & Hướng Tâm, Phi Tinh 4 Hóa theo 10 Thiên Can.
-   - Cập nhật `palaces.ts`: Tính Lai Nhân Cung (Can năm sinh = Can cung), Đẩu Quân & 12 Lưu Nguyệt, 12 Đại Vận & Lưu Niên cung.
-   - Cập nhật `interpreter.ts`: Luận giải đa trường phái (Cách Cục Nam Phái, Tứ Hóa Bắc Phái, Phi Tinh Tương Tác).
-   - Đồng bộ hoàn toàn sang `/client/src/engine/`.
-2. **Design Tokens & Thẩm Mỹ Cổ Tịch Trung Hoa**:
-   - `client/tailwind.config.js`: Bảng màu Tuyên Chỉ `#F5F0E3`, Sơn Mài `#141210`, Mực Tùng Yên `#1C1915`, Đỏ Chu Sa `#9E2A22`, Cổ Đồng Kim `#9A7B3E`, Thanh Ngọc `#245B43`, Thiên Thanh `#234B6E`.
-   - `client/src/index.css`: Vân sợi giấy SVG noise mịn (`opacity: 0.03`), khung song biên (`frame-double`), con dấu ấn triện vuông (`seal-stamp`), họa tiết hồi văn góc (`meander-corner`).
-   - Xóa bỏ toàn bộ gradient SaaS, glow, bo góc mập, thay thế 100% emoji bằng SVG icons nét mảnh `1.25px`.
-3. **UI Components Chuẩn 3 Tầng & 4 Trường Phái**:
-   - `SchoolSwitcher.tsx`: Thanh chọn 4 trường phái dạng thẻ bài mộc bản.
-   - `Header.tsx`: Logo Bát Quái nét mảnh, chữ Thư pháp Noto Serif, theme toggle.
-   - `ChartForm.tsx`: Khung Song Biên viền Cổ Đồng Kim, góc Hồi Văn, font Noto Serif + Be Vietnam Pro.
-   - `ChartGrid.tsx`: Bố cục 3 tầng sắc nét từng ô, Tuần/Triệt chữ nhật đen mực, Thiên Bàn khung song biên có watermark Bát Quái + ấn triện đỏ, vẽ đường SVG Tam Phương Tứ Chính và 4 đường Phi Tinh (Lộc, Quyền, Khoa, Kỵ).
-   - `InterpretationTabs.tsx`: Tích hợp 4 chế độ luận giải.
-   - `TuViAssistant.tsx`: Trợ lý luận đoán theo trường phái.
-   - `ExportModal.tsx`: Canvas 2D vẽ ảnh đúng vân Tuyên Chỉ, khung song biên và bố cục 3 tầng.
-4. **Kiểm Thử & Đóng Gói**:
-   - Unit tests engine trong `server/tests/`.
-   - Playwright E2E trong `e2e/tuvi.spec.ts` (kiểm tra 4 trường phái, bố cục 3 tầng, SVG Phi Tinh, mobile responsive, xuất ảnh).
-   - Chạy build và test, tự động sửa lỗi, git commit & push.
+---
+
+## 1. Kiến Trúc & Các Thành Phần
+
+```mermaid
+flowchart TD
+    subgraph MasterStudio["Master's Studio - Cụm Tính Năng Thầy Tử Vi"]
+        R["1. Custom Engine Ruleset\n(Bảng Tứ Hóa, Giờ Tý, Tháng Nhuận, Mốc Năm)"]
+        Rect["2. Birth Hour Rectification\n(Định Giờ Sinh: 3 Lá Số Song Song & Checklist)"]
+        WB["3. Master Toolbar & Live Whiteboard\n(Bút vẽ trực tiếp, Ẩn danh livestream)"]
+        CRM["4. CRM Hồ Sơ & Nghiệm Lý\n(Tag khách, Lịch sử nghiệm lý theo năm)"]
+        WL["5. White-Label & Ấn Triện Thầy\n(Hiệu danh, Khắc ấn triện đỏ, Đồng bộ xuất ảnh)"]
+    end
+
+    subgraph BackendEngine["/server Engine & API"]
+        TRules["TuViRuleset Engine\n(canhVariant, ziHourMode, leapMonthMode)"]
+        CrmAPI["CRM Controller & Storage\n(MongoDB + JSON Memory Fallback)"]
+    end
+
+    subgraph FrontendUI["/client Components"]
+        RuleDrawer["CustomRulesetDrawer.tsx"]
+        RectPage["BirthHourRectification.tsx"]
+        Toolbar["MasterToolbar.tsx + WhiteboardCanvas.tsx"]
+        CrmDrawer["CrmClientDrawer.tsx"]
+        WlModal["WhiteLabelModal.tsx"]
+    end
+
+    R --> TRules
+    TRules --> RuleDrawer
+    Rect --> RectPage
+    WB --> Toolbar
+    CRM --> CrmAPI
+    CrmAPI --> CrmDrawer
+    WL --> WlModal
+```
+
+---
+
+## 2. Kế Hoạch Triển Khai Chi Tiết
+
+### Phase 1: Engine Ruleset & Custom Phái Luật
+1. Mở rộng `server/src/engine/tuvi/types.ts` & `client/src/engine/types.ts`:
+   - `TuViRuleset`, `canhVariant`, `nhamVariant`, `mauVariant`, `ziHourMode`, `leapMonthMode`, `yearBoundaryMode`, `khoiVietVariant`, `luuNguyetMethod`, `schoolPreset`.
+   - Cập nhật `TuViInput` nhận optional `ruleset`.
+2. Cập nhật `server/src/engine/tuvi/elements.ts` & `stars.ts`:
+   - Hàm `getTuHoaTable(ruleset?: TuViRuleset)` tính toán Tứ Hóa động theo các biến thể:
+     - `canhVariant`: `vn_standard` (Nhật Vũ Âm Đồng), `toan_thu` (Nhật Vũ Phủ Đồng), `bac_phai_alt` (Nhật Vũ Đồng Âm).
+     - `nhamVariant`: `vn_standard` (Lương Tử Phù Vũ), `toan_thu` (Lương Tử Phủ Vũ).
+     - `mauVariant`: `vn_standard` (Tham Âm Bật Cơ), `toan_thu` (Tham Âm Dương Cơ).
+3. Cập nhật `server/src/engine/tuvi/lunar.ts` & `index.ts`:
+   - `ziHourMode`: Giờ Tý 23:00 - 00:00: `split_next_day` (Vãn Tý tính sang ngày hôm sau) vs `keep_current_day`.
+   - `leapMonthMode`: `previous_month` vs `split_day_15` (1-15 tháng trước, 16-30 tháng sau) vs `next_month`.
+   - `yearBoundaryMode`: `lunar_new_year` (Mùng 1 Tết Âm) vs `lichun` (Tiết Lập Xuân).
+   - `khoiVietVariant`: `vn_standard` vs `bac_phai`.
+4. Đồng bộ toàn bộ sang `client/src/engine/`.
+5. Tạo `client/src/components/CustomRulesetDrawer.tsx`:
+   - Khung song biên cổ điển, chọn 4 preset có sẵn (*Nam Phái Việt Nam*, *Bắc Phái Khâm Thiên*, *Trung Châu Phái*, *Tử Vi Toàn Thư*) + tùy chỉnh chi tiết từng Can.
+   - Nút "Lưu thành Phái Luật Riêng" lưu vào DB/localStorage.
+
+### Phase 2: CRM Quản Lý Hồ Sơ Khách Hàng & Nhật Ký Nghiệm Lý
+1. Schema & Model Backend:
+   - `server/src/models/ClientChart.ts` (Mongoose schema).
+   - `server/src/storage/memoryStore.ts`: thêm `saveClientChart`, `getClientCharts`, `updateClientChart`, `deleteClientChart`, `addVerificationNote`, `deleteVerificationNote` (với file lưu cục bộ `data/crm_fallback.json`).
+   - `server/src/config/db.ts`: wrap các hàm DB CRM kèm fallback tự động.
+2. API Endpoints trong `server/src/app.ts`:
+   - `GET /api/crm/charts` (tìm kiếm theo tên, năm sinh, chính tinh, tag).
+   - `POST /api/crm/charts`.
+   - `GET /api/crm/charts/:id`.
+   - `PUT /api/crm/charts/:id`.
+   - `DELETE /api/crm/charts/:id`.
+   - `POST /api/crm/charts/:id/notes` (ghi chú nghiệm lý theo năm kèm trạng thái).
+   - `DELETE /api/crm/charts/:id/notes/:noteId`.
+3. Component `client/src/components/CrmClientDrawer.tsx`:
+   - Danh sách hồ sơ khách hàng, gắn thẻ (*Gia đình*, *Doanh nhân*, *Hôn nhân*, *Khách VIP*, *Mẫu học thuật*).
+   - Chi tiết hồ sơ: Bảng Nhật Ký Nghiệm Lý theo từng năm (`2024`, `2025`...) với trạng thái (*Đã ứng nghiệm*, *Đang theo dõi*, *Cần kiểm lại*).
+   - Bấm vào năm nào trên nhật ký -> lá số tự động nhảy năm đối chiếu tức thì!
+
+### Phase 3: White-Label & Ấn Triện Riêng Của Thầy
+1. Type & State `MasterBrandConfig`:
+   - `brandName`: Tên hiệu/phái của thầy.
+   - `sealText`: 2-4 chữ Hán-Việt cho con dấu (VD: "Minh Khang", "Gia Cát").
+   - `contactInfo`: Hotline / Zalo.
+   - `subtitle`: Khẩu quyết hoặc dòng phụ.
+   - `logoUrl`: Logo hoặc ảnh mã QR.
+   - `enabled`: Bật/Tắt White-Label.
+2. Component `client/src/components/WhiteLabelModal.tsx`:
+   - Form cấu hình thương hiệu của thầy, lưu vào DB/localStorage.
+   - Live preview con dấu ấn triện đỏ chu sa khắc đá dạng SVG.
+3. Đồng bộ hiển thị:
+   - Cập nhật Thiên Bàn trong `ChartGrid.tsx`: khi bật White-Label, hiển thị tên hiệu, con dấu ấn triện đỏ và thông tin của thầy.
+   - Cập nhật `ExportModal.tsx`: xuất ảnh PNG 2D Canvas áp dụng thương hiệu của thầy.
+
+### Phase 4: Master Toolbar, Chế Độ Ẩn Danh & Live Whiteboard Overlay
+1. Component `client/src/components/MasterToolbar.tsx`:
+   - Đặt ngay trên khung 4x4:
+     - Nút "Ẩn Danh (Livestream)": che Họ Tên thành `Đương Số (Ẩn Danh)` và che ngày sinh thành `**/**/YYYY`.
+     - Nút "Bút Giảng Bài (Whiteboard)": bật/tắt canvas vẽ trực tiếp.
+     - Nút "Phái Luật": mở Drawer cấu hình quy tắc.
+     - Nút "Hồ Sơ CRM": mở Drawer khách hàng.
+     - Nút "Hiệu Danh & Ấn Triện": mở White-Label modal.
+2. Component `client/src/components/WhiteboardCanvas.tsx`:
+   - Lớp Canvas trong suốt phủ khít lên khung ma trận 4x4.
+   - Công cụ: Bút vẽ tự do (3 màu Cổ Tịch: Chu Sa `#9E2A22`, Cổ Đồng Kim `#9A7B3E`, Thanh Ngọc `#245B43`), Khoanh tròn nhấn sao, Mũi tên chỉ hướng Phi Hóa, Hoàn tác (Undo), Xóa bảng, Chụp ảnh gộp nét vẽ.
+
+### Phase 5: Công Cụ Định Giờ Sinh Thông Minh (Birth Hour Rectification)
+1. Engine định giờ sinh `server/src/engine/tuvi/rectification.ts`:
+   - Thuật toán sinh song song 3 lá số (giờ trước - giờ chính - giờ sau).
+   - Bảng 8-10 tiêu chí nghiệm lý thực tế (Ngoại hình, Vị thứ anh em, Xu hướng nghề nghiệp, Hôn nhân, Biến cố gần nhất, Tính cách, v.v.).
+   - Logic đối chiếu sao thực tế để chấm điểm độ khớp (%).
+2. Component `client/src/components/BirthHourRectification.tsx`:
+   - So sánh 3 cột Cung Mệnh, Thân, Phu Thê, Quan Lộc, Phụ Mẫu, Huynh Đệ.
+   - Checklist nghiệm lý tương tác tính điểm % trực tiếp.
+   - Nút "Chốt giờ này & Mở Lá Số Đầy Đủ" nạp thẳng vào lá số chính.
+3. Gắn liên kết trên `Header.tsx` và điều hướng mượt mà trong `App.tsx`.
+
+### Phase 6: Unit Test, Build & Playwright E2E Verification
+1. Viết Unit Test Backend `server/tests/studio_engine.test.ts`:
+   - Test các biến thể Canh/Nhâm/Mậu của Tứ Hóa.
+   - Test `ziHourMode` (23h sang ngày mới vs giữ ngày cũ).
+   - Test `leapMonthMode` (3 chế độ).
+   - Test API CRM (CRUD, notes, search).
+   - Test thuật toán chấm điểm Định Giờ Sinh.
+2. Viết E2E Playwright `e2e/master_studio.spec.ts`:
+   - Test Drawer Phái Luật -> đổi Tứ Hóa -> cập nhật lá số.
+   - Test Định Giờ Sinh -> so sánh 3 cột -> chọn checklist -> chốt giờ sinh.
+   - Test Master Toolbar: bật Ẩn danh (che tên), bật Whiteboard (vẽ canvas).
+   - Test CRM: tạo hồ sơ, thêm ghi chú nghiệm lý, nhảy năm đối chiếu.
+   - Test White-Label: cấu hình ấn triện riêng -> render đúng trên Thiên Bàn.
+   - Test Desktop (`1440x900`) & Mobile (`390x844`).
+3. Build và test sạch 100%, commit chuẩn `feat(studio): add custom ruleset, birth hour rectification, live whiteboard, CRM and white-label` và push lên GitHub.

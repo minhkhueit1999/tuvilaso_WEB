@@ -1,4 +1,4 @@
-import { Star, StarBrightness, ElementType, Gender, PhiHoaDetail, PhiHoaTarget } from './types.js';
+import { Star, StarBrightness, ElementType, Gender, PhiHoaDetail, PhiHoaTarget, TuViRuleset } from './types.js';
 import { CucInfo } from './elements.js';
 import { CHI_NAMES, PALACE_NAMES } from './palaces.js';
 
@@ -59,21 +59,46 @@ export function findTuViPosition(lunarDay: number, cuc: CucInfo): number {
   }
 }
 
-// Bảng Tứ Hóa Thập Thiên Can chuẩn học thuật
-export const TU_HOA_TABLE: Record<string, { loc: string; quyen: string; khoa: string; ky: string }> = {
-  'Giáp': { loc: 'Liêm Trinh', quyen: 'Phá Quân', khoa: 'Vũ Khúc', ky: 'Thái Dương' },
-  'Ất':   { loc: 'Thiên Cơ', quyen: 'Thiên Lương', khoa: 'Tử Vi', ky: 'Thái Âm' },
-  'Bính': { loc: 'Thiên Đồng', quyen: 'Thiên Cơ', khoa: 'Văn Xương', ky: 'Liêm Trinh' },
-  'Đinh': { loc: 'Thái Âm', quyen: 'Thiên Đồng', khoa: 'Thiên Cơ', ky: 'Cự Môn' },
-  'Mậu':  { loc: 'Tham Lang', quyen: 'Thái Âm', khoa: 'Hữu Bật', ky: 'Thiên Cơ' },
-  'Kỷ':   { loc: 'Vũ Khúc', quyen: 'Tham Lang', khoa: 'Thiên Lương', ky: 'Văn Khúc' },
-  'Canh': { loc: 'Thái Dương', quyen: 'Vũ Khúc', khoa: 'Thiên Đồng', ky: 'Thái Âm' },
-  'Tân':  { loc: 'Cự Môn', quyen: 'Thái Dương', khoa: 'Văn Khúc', ky: 'Văn Xương' },
-  'Nhâm': { loc: 'Thiên Lương', quyen: 'Tử Vi', khoa: 'Thiên Phủ', ky: 'Vũ Khúc' },
-  'Quý':  { loc: 'Phá Quân', quyen: 'Cự Môn', khoa: 'Thái Âm', ky: 'Tham Lang' }
-};
+// Bảng Tứ Hóa Thập Thiên Can theo phái luật (mặc định chuẩn Việt Nam)
+export function getTuHoaTable(ruleset?: TuViRuleset): Record<string, { loc: string; quyen: string; khoa: string; ky: string }> {
+  const table: Record<string, { loc: string; quyen: string; khoa: string; ky: string }> = {
+    'Giáp': { loc: 'Liêm Trinh', quyen: 'Phá Quân', khoa: 'Vũ Khúc', ky: 'Thái Dương' },
+    'Ất':   { loc: 'Thiên Cơ', quyen: 'Thiên Lương', khoa: 'Tử Vi', ky: 'Thái Âm' },
+    'Bính': { loc: 'Thiên Đồng', quyen: 'Thiên Cơ', khoa: 'Văn Xương', ky: 'Liêm Trinh' },
+    'Đinh': { loc: 'Thái Âm', quyen: 'Thiên Đồng', khoa: 'Thiên Cơ', ky: 'Cự Môn' },
+    'Mậu':  { loc: 'Tham Lang', quyen: 'Thái Âm', khoa: 'Hữu Bật', ky: 'Thiên Cơ' },
+    'Kỷ':   { loc: 'Vũ Khúc', quyen: 'Tham Lang', khoa: 'Thiên Lương', ky: 'Văn Khúc' },
+    'Canh': { loc: 'Thái Dương', quyen: 'Vũ Khúc', khoa: 'Thái Âm', ky: 'Thiên Đồng' },
+    'Tân':  { loc: 'Cự Môn', quyen: 'Thái Dương', khoa: 'Văn Khúc', ky: 'Văn Xương' },
+    'Nhâm': { loc: 'Thiên Lương', quyen: 'Tử Vi', khoa: 'Tả Phù', ky: 'Vũ Khúc' },
+    'Quý':  { loc: 'Phá Quân', quyen: 'Cự Môn', khoa: 'Thái Âm', ky: 'Tham Lang' }
+  };
 
-export function placeMajorStars(tuViPos: number, canYear: string): Record<number, Star[]> {
+  if (ruleset) {
+    // 1. Canh variant
+    if (ruleset.canhVariant === 'toan_thu') {
+      table['Canh'] = { loc: 'Thái Dương', quyen: 'Vũ Khúc', khoa: 'Thiên Phủ', ky: 'Thiên Đồng' };
+    } else if (ruleset.canhVariant === 'bac_phai_alt') {
+      table['Canh'] = { loc: 'Thái Dương', quyen: 'Vũ Khúc', khoa: 'Thiên Đồng', ky: 'Thái Âm' };
+    }
+
+    // 2. Nhâm variant
+    if (ruleset.nhamVariant === 'toan_thu') {
+      table['Nhâm'] = { loc: 'Thiên Lương', quyen: 'Tử Vi', khoa: 'Thiên Phủ', ky: 'Vũ Khúc' };
+    }
+
+    // 3. Mậu variant
+    if (ruleset.mauVariant === 'toan_thu') {
+      table['Mậu'] = { loc: 'Tham Lang', quyen: 'Thái Âm', khoa: 'Thái Dương', ky: 'Thiên Cơ' };
+    }
+  }
+
+  return table;
+}
+
+export const TU_HOA_TABLE = getTuHoaTable();
+
+export function placeMajorStars(tuViPos: number, canYear: string, ruleset?: TuViRuleset): Record<number, Star[]> {
   const result: Record<number, Star[]> = {};
   for (let i = 0; i < 12; i++) result[i] = [];
 
@@ -99,7 +124,8 @@ export function placeMajorStars(tuViPos: number, canYear: string): Record<number
   ];
 
   const allMajor = [...tvStars, ...tpStars];
-  const tuHoaRules = TU_HOA_TABLE[canYear];
+  const tuHoaTable = getTuHoaTable(ruleset);
+  const tuHoaRules = tuHoaTable[canYear];
 
   for (const [name, pos] of allMajor) {
     const info = MAJOR_STARS_INFO[name];
@@ -179,7 +205,8 @@ export function placeMinorStars(
   isThuan: boolean,
   viewingYear = 2026,
   menhIndex = 0,
-  thanIndex = 0
+  thanIndex = 0,
+  ruleset?: TuViRuleset
 ): {
   catStars: Record<number, Star[]>;
   satStars: Record<number, Star[]>;
@@ -228,7 +255,8 @@ export function placeMinorStars(
   };
 
   const chiYearIndex = CHI_NAMES.indexOf(chiYear);
-  const tuHoaRules = TU_HOA_TABLE[canYear];
+  const tuHoaTable = getTuHoaTable(ruleset);
+  const tuHoaRules = tuHoaTable[canYear];
 
   // 1. TẢ PHÙ, HỮU BẬT (theo tháng) - Cát Đậm
   const posTaPhu = (4 + (lunarMonth - 1)) % 12;
@@ -263,11 +291,13 @@ export function placeMinorStars(
   addSat(posDa, 'Đà La', 'Kim', 'phu_tinh_hung', daBright, false, 'bold');
 
   // 4. THIÊN KHÔI, THIÊN VIỆT (Cát Đậm)
+  const isBacPhaiKhoiViet = ruleset?.khoiVietVariant === 'bac_phai';
   const KHOI_VIET_MAP: Record<string, [number, number]> = {
-    'Giáp': [1, 7], 'Mậu': [1, 7], 'Canh': [1, 7],
+    'Giáp': [1, 7], 'Mậu': [1, 7],
+    'Canh': isBacPhaiKhoiViet ? [1, 7] : [6, 2],
     'Ất': [0, 8], 'Kỷ': [0, 8],
     'Bính': [11, 9], 'Đinh': [11, 9],
-    'Tân': [6, 2],
+    'Tân': isBacPhaiKhoiViet ? [2, 6] : [6, 2],
     'Nhâm': [3, 5], 'Quý': [3, 5]
   };
   const [posKhoi, posViet] = KHOI_VIET_MAP[canYear] || [1, 7];
@@ -538,7 +568,7 @@ export function placeMinorStars(
   const canViewingIndex = (viewingYear + 6) % 10;
   const chiViewingIndex = (viewingYear + 8) % 12;
   const canViewing = CAN[canViewingIndex];
-  const tuHoaLuu = TU_HOA_TABLE[canViewing];
+  const tuHoaLuu = tuHoaTable[canViewing];
 
   // L.Thái Tuế, L.Tang Môn, L.Bạch Hổ
   addSat(chiViewingIndex, 'L.Thái Tuế', 'Hoa', 'sao_luu_nien', undefined, true);
@@ -594,23 +624,25 @@ export function placeMinorStars(
 export function calculateTuHoaLyHuongTam(
   palaceCans: string[],
   majorStarsByPalace: Record<number, Star[]>,
-  minorStarsByPalace: Record<number, Star[]>
+  minorStarsByPalace: Record<number, Star[]>,
+  ruleset?: TuViRuleset
 ): {
   updatedMajor: Record<number, Star[]>;
   updatedMinor: Record<number, Star[]>;
 } {
   const updatedMajor: Record<number, Star[]> = {};
   const updatedMinor: Record<number, Star[]> = {};
+  const tuHoaTable = getTuHoaTable(ruleset);
 
   for (let i = 0; i < 12; i++) {
     updatedMajor[i] = [];
     updatedMinor[i] = [];
     const myCan = palaceCans[i];
-    const myRules = TU_HOA_TABLE[myCan];
+    const myRules = tuHoaTable[myCan];
 
     const oppPalaceId = (i + 6) % 12;
     const oppCan = palaceCans[oppPalaceId];
-    const oppRules = TU_HOA_TABLE[oppCan];
+    const oppRules = tuHoaTable[oppCan];
 
     const processStar = (star: Star): Star => {
       const cloned = { ...star };
@@ -644,14 +676,16 @@ export function calculateTuHoaLyHuongTam(
 export function calculatePhiHoaTable(
   palaceCans: string[],
   palaceNames: string[],
-  allStarsLocation: Record<string, number>
+  allStarsLocation: Record<string, number>,
+  ruleset?: TuViRuleset
 ): Record<number, PhiHoaDetail> {
   const table: Record<number, PhiHoaDetail> = {};
+  const tuHoaTable = getTuHoaTable(ruleset);
 
   for (let i = 0; i < 12; i++) {
     const fromCan = palaceCans[i];
     const fromName = palaceNames[i];
-    const rules = TU_HOA_TABLE[fromCan];
+    const rules = tuHoaTable[fromCan];
     if (!rules) continue;
 
     const findTarget = (starName: string): PhiHoaTarget => {

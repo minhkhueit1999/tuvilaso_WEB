@@ -1,5 +1,5 @@
-import { ThienBan, Palace, Interpretation, TamPhuongTuChinh, AspectScores, ChartData, Star, TuViSchool } from './types.js';
-import { TU_HOA_TABLE } from './stars.js';
+import { ThienBan, Palace, Interpretation, TamPhuongTuChinh, AspectScores, ChartData, Star, TuViSchool, TuViRuleset } from './types.js';
+import { TU_HOA_TABLE, getTuHoaTable } from './stars.js';
 
 export function calculateAspectScores(palaces: Palace[]): AspectScores {
   const findPalace = (name: string) => palaces.find(p => p.name === name) || palaces[0];
@@ -125,7 +125,8 @@ export function generateInterpretation(
   palaces: Palace[],
   tamPhuongTuChinh: Record<number, TamPhuongTuChinh>,
   viewingYear = 2026,
-  school: TuViSchool = 'tong_hop'
+  school: TuViSchool = 'tong_hop',
+  ruleset?: TuViRuleset
 ): Interpretation {
   const menhPalace = palaces.find(p => p.isMenh) || palaces[0];
   const thanPalace = palaces.find(p => p.isThan) || palaces[0];
@@ -266,7 +267,7 @@ export function generateInterpretation(
   const khamThienMon = {
     laiNhanAnalysis: `Lai Nhân Cung tại ${laiNhanPalace.name} (${laiNhanPalace.can} ${laiNhanPalace.branch}): Theo Khâm Thiên Tứ Hóa, đây là nơi đương số gieo nhân và gặt quả, mọi động lực phát triển, thử thách và thành quả lớn nhất của cuộc đời đều quy hồi về cung này.`,
     sinhNienAnalysis: `Sinh Niên Tứ Hóa: Hóa Lộc (${thienBan.tuHoaYear.loc}) chủ duyên may khởi sự; Hóa Quyền (${thienBan.tuHoaYear.quyen}) chủ quyền biến và năng lực thực thi; Hóa Khoa (${thienBan.tuHoaYear.khoa}) chủ quý nhân và danh tiếng; Hóa Kỵ (${thienBan.tuHoaYear.ky}) chủ tâm niệm chấp niệm và nơi cần bồi đắp nhiều nhất.`,
-    tuHoaTable: Object.entries(TU_HOA_TABLE).map(([can, r]) => ({
+    tuHoaTable: Object.entries(getTuHoaTable(ruleset)).map(([can, r]) => ({
       can,
       loc: r.loc,
       quyen: r.quyen,

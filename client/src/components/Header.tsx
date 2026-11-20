@@ -5,7 +5,9 @@ import {
   IconQuatGiay,
   IconAnTrien,
   IconNhatThuc,
-  IconNguyetThuc
+  IconNguyetThuc,
+  IconLaKinh,
+  IconThaiCuc
 } from './OrientalIcons';
 
 interface HeaderProps {
@@ -14,6 +16,10 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenKnowledge: () => void;
   onOpenSamples: () => void;
+  onOpenRectification?: () => void;
+  onOpenRuleset?: () => void;
+  onOpenCrm?: () => void;
+  onOpenWhiteLabel?: () => void;
   historyCount: number;
 }
 
@@ -23,6 +29,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenKnowledge,
   onOpenSamples,
+  onOpenRectification,
+  onOpenRuleset,
+  onOpenCrm,
+  onOpenWhiteLabel,
   historyCount
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,6 +92,24 @@ export const Header: React.FC<HeaderProps> = ({
             <IconQuatGiay className="w-3.5 h-3.5" />
             <span>Kho Lá Số Mẫu</span>
           </button>
+          {onOpenRectification && (
+            <button
+              onClick={onOpenRectification}
+              className="px-3 py-1.5 rounded-none flex items-center gap-1.5 hover:text-paper-red dark:hover:text-night-gold hover:bg-paper-red/5 dark:hover:bg-night-gold/10 transition-colors cursor-pointer"
+            >
+              <IconLaKinh className="w-3.5 h-3.5 text-paper-red dark:text-night-gold" />
+              <span>Định Giờ Sinh</span>
+            </button>
+          )}
+          {onOpenCrm && (
+            <button
+              onClick={onOpenCrm}
+              className="px-3 py-1.5 rounded-none flex items-center gap-1.5 hover:text-paper-red dark:hover:text-night-gold hover:bg-paper-red/5 dark:hover:bg-night-gold/10 transition-colors cursor-pointer"
+            >
+              <IconAnTrien className="w-3.5 h-3.5 text-paper-gold dark:text-night-gold" />
+              <span>Hồ Sơ CRM</span>
+            </button>
+          )}
         </nav>
 
         {/* Action Buttons */}
@@ -166,6 +194,30 @@ export const Header: React.FC<HeaderProps> = ({
             <IconQuatGiay className="w-4 h-4" />
             <span>Kho Lá Số Mẫu</span>
           </button>
+          {onOpenRectification && (
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenRectification();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 px-2 hover:bg-paper-cardAlt rounded-none text-paper-text dark:text-night-text"
+            >
+              <IconLaKinh className="w-4 h-4 text-paper-red" />
+              <span>Định Giờ Sinh</span>
+            </button>
+          )}
+          {onOpenCrm && (
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenCrm();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 px-2 hover:bg-paper-cardAlt rounded-none text-paper-text dark:text-night-text"
+            >
+              <IconAnTrien className="w-4 h-4 text-paper-gold" />
+              <span>Hồ Sơ CRM</span>
+            </button>
+          )}
         </div>
       )}
     </header>
