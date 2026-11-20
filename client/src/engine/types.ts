@@ -28,8 +28,6 @@ export interface Star {
   sinhNienHoa?: 'A' | 'B' | 'C' | 'D';
   tuHoaLyTam?: 'A' | 'B' | 'C' | 'D';
   tuHoaHuongTam?: 'A' | 'B' | 'C' | 'D';
-  dvTuHoa?: 'ĐV.Lộc' | 'ĐV.Quyền' | 'ĐV.Khoa' | 'ĐV.Kỵ';
-  lnTuHoa?: 'L.Hóa Lộc' | 'L.Hóa Quyền' | 'L.Hóa Khoa' | 'L.Hóa Kỵ';
   note?: string;
 }
 
@@ -49,10 +47,6 @@ export interface Palace {
   isMenh: boolean;
   isThan: boolean;
   isLaiNhan?: boolean; // Lai Nhân Cung (Bắc Phái)
-  isDV?: boolean; // Cung Đại Vận (ĐV.MỆNH)
-  isLDH?: boolean; // Cung Lưu Đại Hạn
-  isTieuHan?: boolean; // Cung Tiểu Hạn
-  isLN?: boolean; // Cung Lưu Thái Tuế (LN.MỆNH)
   majorStars: Star[];
   catStars: Star[]; // Cát tinh (cột trái)
   satStars: Star[]; // Sát tinh + Lưu tinh (cột phải)
@@ -168,83 +162,6 @@ export interface Interpretation {
   };
 }
 
-export interface DaiVanItem {
-  decadeIndex: number; // 0..11
-  startAge: number;
-  endAge: number;
-  palaceId: number; // chi index 0..11
-  palaceName: string;
-  can: string;
-  branch: string;
-  tuHoa: {
-    loc: string;
-    quyen: string;
-    khoa: string;
-    ky: string;
-  };
-}
-
-export interface DaiVanYearlyStep {
-  year: number;
-  age: number;
-  offset: number; // 0..9
-  chiIdx: number; // 0..11
-  palaceName: string;
-  branch: string;
-  can: string;
-}
-
-export interface VanHanCoordinates {
-  age: number;
-  isDongHan: boolean;
-  dongHanPalaceName?: string;
-  dvDir: 1 | -1;
-  dvDirectionLabel: string; // 'Thuận hành ↻' | 'Nghịch hành ↺'
-  dvChi: number; // Cung ĐV.MỆNH
-  dvPalaceName: string;
-  dvCan: string;
-  dvStartAge: number;
-  dvEndAge: number;
-  dvTuHoa: {
-    loc: string;
-    quyen: string;
-    khoa: string;
-    ky: string;
-  };
-  ldhChi: number; // Cung Lưu Đại Hạn
-  ldhPalaceName: string;
-  tieuHanChi: number; // Cung Tiểu Hạn
-  tieuHanPalaceName: string;
-  lnMenhChi: number; // Cung Lưu Thái Tuế (LN.MỆNH)
-  lnPalaceName: string;
-  lnCan: string;
-  lnTuHoa: {
-    loc: string;
-    quyen: string;
-    khoa: string;
-    ky: string;
-  };
-  chongCung: {
-    dvMenhOnBanMenh: string;
-    ldhOnBanMenh: string;
-    tieuHanOnBanMenh: string;
-    lnMenhOnBanMenh: string;
-    relationships: string[];
-  };
-  luuNguyetMethod: 'thai_tue' | 'tieu_han';
-  luuNguyetTable: Array<{
-    month: number;
-    palaceId: number;
-    palaceName: string;
-    can: string;
-    branch: string;
-    majorStars: string[];
-    assessment: string;
-  }>;
-  daiVanList: DaiVanItem[];
-  daiVanYearlyPath: DaiVanYearlyStep[];
-}
-
 export interface ChartData {
   id?: string;
   createdAt: string;
@@ -255,11 +172,9 @@ export interface ChartData {
   palaces: Palace[];
   tamPhuongTuChinh: Record<number, TamPhuongTuChinh>;
   phiHoaTable: Record<number, PhiHoaDetail>;
-  vanHan: VanHanCoordinates;
   interpretation: Interpretation;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
-  showVanHanPath?: boolean;
 }
 
 export interface TuViInput {
@@ -273,10 +188,7 @@ export interface TuViInput {
   minute: number;
   isLeapMonth?: boolean;
   viewingYear?: number;
-  selectedDecadeIndex?: number;
-  luuNguyetMethod?: 'thai_tue' | 'tieu_han';
   school?: TuViSchool;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
-  showVanHanPath?: boolean;
 }

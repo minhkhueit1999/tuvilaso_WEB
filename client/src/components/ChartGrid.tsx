@@ -16,7 +16,6 @@ interface ChartGridProps {
   chartRef?: React.Ref<HTMLDivElement>;
   showTamPhuongTuChinh?: boolean;
   showLuuNien?: boolean;
-  showVanHanPath?: boolean;
   activeSchool?: TuViSchool;
 }
 
@@ -29,7 +28,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
   chartRef,
   showTamPhuongTuChinh = true,
   showLuuNien = true,
-  showVanHanPath = false,
   activeSchool = 'tong_hop'
 }) => {
   const [copied, setCopied] = useState(false);
@@ -274,53 +272,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                 <circle cx={pActive.x} cy={pActive.y} r="0.9" fill="#1C1915" stroke="#9A7B3E" strokeWidth="0.25" opacity="0.8" />
               </g>
             )}
-
-            {/* 3. Mode: Đường Đi Vận Hạn 10 Năm (Lưu Đại Hạn ziczac) */}
-            {showVanHanPath && chart.vanHan?.daiVanYearlyPath && (
-              <g className="transition-all duration-300">
-                <polyline
-                  points={chart.vanHan.daiVanYearlyPath
-                    .map(step => {
-                      const p = palaces.find(pl => pl.id === step.chiIdx);
-                      const coord = getCenterCoord(p?.position);
-                      return `${coord.x},${coord.y}`;
-                    })
-                    .join(' ')}
-                  fill="none"
-                  stroke="rgba(184, 134, 11, 0.55)"
-                  strokeWidth="0.3"
-                  strokeDasharray="1.2,1.2"
-                />
-                {chart.vanHan.daiVanYearlyPath.map((step, idx) => {
-                  const p = palaces.find(pl => pl.id === step.chiIdx);
-                  const coord = getCenterCoord(p?.position);
-                  const isCurrentViewing = step.year === thienBan.viewingYear;
-                  return (
-                    <g key={idx}>
-                      <circle
-                        cx={coord.x}
-                        cy={coord.y}
-                        r={isCurrentViewing ? 1.5 : 1.1}
-                        fill={isCurrentViewing ? '#8B1E1E' : '#FFFDF9'}
-                        stroke="#B8860B"
-                        strokeWidth="0.25"
-                      />
-                      <text
-                        x={coord.x}
-                        y={coord.y + 0.35}
-                        fontSize="0.85"
-                        textAnchor="middle"
-                        fill={isCurrentViewing ? '#FFFDF9' : '#8B1E1E'}
-                        fontWeight="bold"
-                        fontFamily="serif"
-                      >
-                        {step.offset + 1}
-                      </text>
-                    </g>
-                  );
-                })}
-              </g>
-            )}
           </svg>
 
           {/* 4x4 Grid Matrix */}
@@ -504,26 +455,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                               LAI NHÂN
                             </span>
                           )}
-                          {cell.isDV && (
-                            <span className="seal-stamp text-[8px] border-paper-gold text-paper-gold bg-paper-gold/15" title="Cung Đại Vận (ĐV.MỆNH)">
-                              ĐV
-                            </span>
-                          )}
-                          {cell.isLDH && (
-                            <span className="seal-stamp text-[8px] border-paper-red text-paper-red bg-paper-red/15" title="Cung Lưu Đại Hạn Năm Xem">
-                              L.ĐH
-                            </span>
-                          )}
-                          {cell.isTieuHan && (
-                            <span className="seal-stamp text-[8px] border-amber-600 text-amber-700 dark:text-amber-300 bg-amber-500/15" title="Cung Tiểu Hạn Năm Xem">
-                              T.HẠN
-                            </span>
-                          )}
-                          {cell.isLN && (
-                            <span className="seal-stamp text-[8px] border-blue-600 text-blue-700 dark:text-blue-400 bg-blue-500/15" title="Cung Lưu Thái Tuế (LN.MỆNH)">
-                              L.TUẾ
-                            </span>
-                          )}
                         </div>
 
                         {/* Chính tinh kèm Miếu/Hãm & Tứ Hóa */}
@@ -543,18 +474,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                                 {(currentSchool !== 'nam_phai') && star.sinhNienHoa && (
                                   <span className="ml-0.5 px-0.8 py-0.2 text-[8px] font-bold bg-paper-red text-paper-bg dark:bg-night-red dark:text-night-bg">
                                     {star.sinhNienHoa}
-                                  </span>
-                                )}
-                                {/* Đại Vận Tứ Hóa */}
-                                {star.dvTuHoa && (
-                                  <span className="ml-0.5 px-1 py-0.2 text-[8px] font-bold border border-paper-gold text-paper-gold bg-paper-gold/10" title={`Đại Vận Hóa ${star.dvTuHoa}`}>
-                                    ĐV.{star.dvTuHoa}
-                                  </span>
-                                )}
-                                {/* Lưu Niên Tứ Hóa */}
-                                {star.lnTuHoa && (
-                                  <span className="ml-0.5 px-1 py-0.2 text-[8px] font-bold border border-paper-red text-paper-red bg-paper-red/10" title={`Lưu Niên Hóa ${star.lnTuHoa}`}>
-                                    LN.{star.lnTuHoa}
                                   </span>
                                 )}
                                 {/* Tự Hóa Ly Tâm [↑A..D] */}
@@ -605,12 +524,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                             <span>{star.name}</span>
                             {(currentSchool !== 'nam_phai') && star.sinhNienHoa && (
                               <span className="ml-0.5 text-[8px] font-bold text-paper-red">[{star.sinhNienHoa}]</span>
-                            )}
-                            {star.dvTuHoa && (
-                              <span className="ml-0.5 px-0.8 py-0.2 text-[8px] font-bold border border-paper-gold text-paper-gold">ĐV.{star.dvTuHoa}</span>
-                            )}
-                            {star.lnTuHoa && (
-                              <span className="ml-0.5 px-0.8 py-0.2 text-[8px] font-bold border border-paper-red text-paper-red">LN.{star.lnTuHoa}</span>
                             )}
                           </div>
                         ))}
