@@ -336,6 +336,7 @@ export function generateTuViChart(input: TuViInput): ChartData {
   const calendar = generatePersonalCalendar(palaces, viewingYear, canChi.chiYear, lunarMonth, chiHourIndex);
 
   return {
+    id: `chart_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
     createdAt: new Date().toISOString(),
     school,
     ruleset,

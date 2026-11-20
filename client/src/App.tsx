@@ -189,22 +189,8 @@ export const App: React.FC = () => {
     let newChart: ChartData | null = null;
 
     try {
-      // 1. Attempt safe fetch from backend REST API
-      const res = await safeJsonFetch<{ success: boolean; data: ChartData }>('/api/laso/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(enrichedInput)
-      });
-
-      if (res.ok && res.data?.success && res.data?.data) {
-        newChart = res.data.data;
-      }
-
-      // 2. Seamless in-browser fallback if backend is offline or returned empty
-      if (!newChart) {
-        newChart = generateTuViChart(enrichedInput);
-      }
-
+      // 1. Calculate immediately with in-browser engine (Instant 0ms, 100% resilient)
+      newChart = generateTuViChart(enrichedInput);
       setChart(newChart);
 
       // Auto select Cung Mệnh
@@ -225,9 +211,15 @@ export const App: React.FC = () => {
       setTimeout(() => {
         document.getElementById('chart-section')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
+
+      // 2. Sync to backend REST API in background if server is online (non-blocking)
+      safeJsonFetch<{ success: boolean; data: ChartData }>('/api/laso/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(enrichedInput)
+      }).catch(() => {});
     } catch (err: any) {
       console.error('Fatal calculation error:', err);
-      // Emergency in-browser fallback
       try {
         newChart = generateTuViChart(enrichedInput);
         setChart(newChart);

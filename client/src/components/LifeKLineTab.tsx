@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { LifeKLineResult, KLineCandle } from '../engine/kline';
 import { IconAnTrien, IconThaiCuc, IconMeanderCorner } from './OrientalIcons';
 import { TrendingUp, Download, Eye, EyeOff, Award } from 'lucide-react';
@@ -21,6 +21,8 @@ export const LifeKLineTab: React.FC<LifeKLineTabProps> = ({
   const [showWealth, setShowWealth] = useState(true);
   const [showCareer, setShowCareer] = useState(true);
   const [showLove, setShowLove] = useState(false);
+  const [exportedToast, setExportedToast] = useState(false);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   if (!klineData || !klineData.candles || klineData.candles.length === 0) {
     return (
@@ -57,8 +59,37 @@ export const LifeKLineTab: React.FC<LifeKLineTabProps> = ({
   };
 
   const handleExportPng = () => {
-    // Generate simple notification or canvas export
-    alert(`Đã kích hoạt tạo ảnh biểu đồ K-Line Cuộc Đời với Ấn Triện [${brandName}].`);
+    if (!svgRef.current) return;
+    try {
+      const svgElement = svgRef.current;
+      const svgString = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const URLObj = window.URL || window.webkitURL || window;
+      const blobURL = URLObj.createObjectURL(svgBlob);
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = svgWidth * 2;
+        canvas.height = svgHeight * 2;
+        const context = canvas.getContext('2d');
+        if (context) {
+          context.fillStyle = '#FFFDF9';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const png = canvas.toDataURL('image/png');
+          const downloadLink = document.createElement('a');
+          downloadLink.download = `KLine_${brandName.replace(/\s+/g, '_')}.png`;
+          downloadLink.href = png;
+          downloadLink.click();
+          setExportedToast(true);
+          setTimeout(() => setExportedToast(false), 2500);
+        }
+        URLObj.revokeObjectURL(blobURL);
+      };
+      image.src = blobURL;
+    } catch {
+      // Fallback
+    }
   };
 
   return (
@@ -78,6 +109,11 @@ export const LifeKLineTab: React.FC<LifeKLineTabProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {exportedToast && (
+            <span className="text-2xs text-emerald-700 dark:text-emerald-400 font-semibold animate-fadeIn">
+              ✓ Đã tải ảnh PNG
+            </span>
+          )}
           <button
             type="button"
             onClick={handleExportPng}
@@ -137,6 +173,7 @@ export const LifeKLineTab: React.FC<LifeKLineTabProps> = ({
       {/* SVG K-Line Chart */}
       <div className="w-full overflow-x-auto bg-paper-bg dark:bg-night-bg border border-paper-border/80 p-2">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-auto min-w-[620px] select-none"
         >

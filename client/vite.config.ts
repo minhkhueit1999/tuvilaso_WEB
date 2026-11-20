@@ -8,7 +8,15 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (_err, _req, res) => {
+            if (res && !res.headersSent && typeof (res as any).writeHead === 'function') {
+              (res as any).writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: false, offline: true }));
+            }
+          });
+        }
       },
       '/uploads': {
         target: 'http://localhost:5000',
