@@ -1,86 +1,44 @@
-# Implementation Plan: Web Lập Lá Số & Luận Đoán Tử Vi Minh Khuê
+# Kế Hoạch Hiện Thực Hóa: Tử Vi Huyền Cơ — Cổ Tịch Trung Hoa & 110+ Sao
 
-> **Architecture & Execution:** Full-stack Monorepo (`/server` + `/client`) adhering to `GEMINI.md` anti-AI-slop Oriental Metaphysics aesthetics, strict engine separation, auto-fallback for DB/Storage, and 100% Playwright E2E test verification.
+## 1. Mục Tiêu Tổng Thể
+Nâng cấp toàn diện ứng dụng **Tử Vi Huyền Cơ** theo chuẩn:
+- **Thẩm mỹ Cổ Tịch Trung Hoa (Sách Mộc Bản & Thư Pháp Tống–Minh)**: Triết lý Lưu Bạch, Giấy Tuyên Chỉ & Sơn Mài Huyền Dạ, Khung Song Biên (Double-line Frame), Con Dấu Ấn Triện (Red Seal Stamp), Họa Tiết Hồi Văn (Meander Corner), tuyệt đối không dùng Emoji, không gradient tím/xanh neon SaaS, không bo góc tròn to (`rounded-none` hoặc `rounded-[2px]`).
+- **Engine Tử Vi 110+ Sao Đầy Đủ**: 14 Chính Tinh (kèm `+`/`-`, Ngũ Hành, Miếu/Vượng/Đắc/Bình/Hãm), Lục Cát & Lục Sát, Vòng Bác Sĩ (12 sao), Vòng Thái Tuế (12 sao), Vòng Tràng Sinh (12 sao), Hệ phụ tinh theo Năm/Tháng/Ngày/Giờ (Thiên Hình, Thiên Riêu, Đẩu Quân, Tam Thai, Bát Tọa, Ân Quang, Thiên Quý...), Sao Lưu Niên, Tuần/Triệt.
+- **Bố Cục 3 Tầng Cho Từng Ô Cung**:
+  * Tầng 1 (Header): Can Chi viết tắt, Âm/Dương Ngũ Hành chi, Tên Cung HOA đậm + Con dấu Ấn Triện (THÂN / LAI NHÂN), Chính tinh (màu ngũ hành), Tuổi Đại Vận, Lưu Nguyệt (`Th.1`..`Th.12`).
+  * Tầng 2 (Thân cung): 2 cột phụ tinh thẳng tắp (Trái: Cát tinh + Lưu Cát; Phải: Sát tinh + Lưu Sát; Ký hiệu Tứ Hóa `A/B/C/D`, Tự Hóa `↑/↓`).
+  * Tầng 3 (Footer): Đại Vận (`ĐV.MỆNH`..), Vòng Tràng Sinh (đậm), Lưu Niên (`LN.MỆNH`..).
+  * Tuần/Triệt: Dấu chữ nhật Đen Mực chữ trắng trên đường giáp ranh.
+- **4 Trường Phái (School Switcher)**:
+  1. **Tổng Hợp**: 110+ sao + Tứ Hóa Tiên Thiên + Tự Hóa + Lai Nhân Cung + Tam Phương Tứ Chính + Tóm tắt Phi Hóa.
+  2. **Nam Phái**: Thuần 110+ sao, Tam Phương Tứ Chính, ẩn ký hiệu Bắc Phái, luận giải theo Cách Cục kinh điển.
+  3. **Bắc Phái**: 18 sao Tứ Hóa, đóng dấu LAI NHÂN CUNG, Sinh Niên Tứ Hóa (`A/B/C/D`), Tự Hóa Ly Tâm (`↑`) & Hướng Tâm (`↓`), bảng đối chiếu Thập Thiên Can.
+  4. **Phi Tinh**: Click cung vẽ 4 đường SVG mũi tên (Phi Lộc `#245B43`, Phi Quyền `#C27803`, Phi Khoa `#234B6E`, Phi Kỵ `#9E2A22` + nét đứt xung chiếu), kèm bảng giải mã thời gian thực.
+- **Chất Lượng & Độ Ổn Định**:
+  * `npm run build` 0 lỗi TypeScript ở cả `/server` và `/client`.
+  * Bộ test Playwright E2E 100% PASS (Desktop + Mobile).
+  * Push sạch lên GitHub `origin/main`.
 
-**Goal:** Build, test, package, and push a complete, production-ready Tu Vi astrology web platform ("Tử Vi Minh Khuê") matching tuvi.vn standards with 4x4 chart, SVG Tam Phương Tứ Chính, dynamic interpretation, dark/light modes, image export, and zero external dependency failure mode.
-
-**Tech Stack:**
-- **Server:** Node.js, Express, TypeScript, Mongoose, Cloudinary, Multer, Lunar calendar algorithms.
-- **Client:** React (Vite), TypeScript, TailwindCSS, Lucide-react, html2canvas / dom-to-image.
-- **Testing:** Playwright E2E, Vitest / Node test runner.
-- **Deployment:** Render (`render.yaml`) & Vercel (`vercel.json`).
-
----
-
-## Phase 1: Repository Setup, Git Configuration & Security
-- [ ] Initialize git repository inside `tuvilaso_WEB` and configure remote origin `https://github.com/minhkhueit1999/tuvilaso_WEB`.
-- [ ] Create root `.gitignore`, `server/.gitignore`, and `client/.gitignore` strictly ignoring `.env`, `*.env`, `node_modules/`, `dist/`, `uploads/`, `playwright-report/`, `test-results/`.
-- [ ] Create `server/.env` with exact sample variables:
-  - `PORT=5000`
-  - `MONGODB_URI=mongodb://localhost:27017/`
-  - `CLOUDINARY_CLOUD_NAME=jfj6evxe`
-  - `CLOUDINARY_API_KEY=912496717995524`
-  - `CLOUDINARY_API_SECRET=Jddg_oB0QNGPoBrcWO2UR6Jr69I`
-- [ ] Create `server/.env.example`, `client/.env`, and `client/.env.example`.
-- [ ] Verify `git status` confirms `.env` files are completely ignored.
-
-## Phase 2: Server Architecture & Tử Vi Engine (`/server`)
-- [ ] Initialize `server` with `package.json`, `tsconfig.json`, `render.yaml`.
-- [ ] Build Fallback Database module (`server/src/config/db.ts` & `server/src/storage/memoryStore.ts`):
-  - In-memory / JSON store fallback when `MONGODB_URI` is blank or unreachable.
-- [ ] Build Storage Service module (`server/src/services/storageService.ts`):
-  - Fallback to local `server/uploads/` directory when Cloudinary credentials are mock or missing.
-- [ ] Build Tu Vi Engine (`server/src/engine/tuvi/`):
-  - `lunar.ts`: Solar to Lunar conversion, leap month handling, Can Chi calculations (Year, Month, Day, Hour).
-  - `elements.ts`: Ngũ Hành Nạp Âm (Lục Thập Hoa Giáp), Âm Dương Nam/Nữ, Cục định danh (Thủy Nhị Cục, Mộc Tam Cục, Kim Tứ Cục, Thổ Ngũ Cục, Hỏa Lục Cục).
-  - `palaces.ts`: An Mệnh, Thân, và 12 Cung (Mệnh, Phụ, Phúc, Điền, Quan, Nô, Di, Tật, Tài, Tử, Phu Thê, Huynh Đệ) thuận/nghịch theo Âm Dương Nam Nữ.
-  - `stars.ts`:
-    * 14 Chính Tinh: Tử Vi, Liêm Trinh, Thiên Đồng, Vũ Khúc, Thái Dương, Thiên Cơ, Thiên Phủ, Thái Âm, Tham Lang, Cự Môn, Thiên Tướng, Thiên Lương, Thất Sát, Phá Quân.
-    * Đắc/Hãm/Miếu/Vượng/Bình cho từng chính tinh trên 12 địa chi.
-    * Phụ tinh: Tả Phù, Hữu Bật, Văn Xương, Văn Khúc, Thiên Khôi, Thiên Việt, Lộc Tồn, Kình Dương, Đà La, Địa Không, Địa Kiếp, Hỏa Tinh, Linh Tinh, Vòng Thái Tuế (12 sao), Vòng Tràng Sinh (12 sao), Tứ Hóa (Hóa Lộc, Hóa Quyền, Hóa Khoa, Hóa Kỵ), Tuần Không & Triệt Không.
-  - `interpreter.ts`: Dynamic generator for General Overview (Mệnh, Thân, Cục, Ngũ hành), 12 Cung analysis, and Decade/Yearly luck fortune.
-- [ ] Build REST API routes:
-  - `POST /api/laso/generate`: Validate input, run engine, store chart (Mongo or memoryStore), return full chart payload.
-  - `GET /api/laso/history`: Return recent charts from store.
-  - `POST /api/laso/upload-image`: Receive image buffer/base64, upload to Cloudinary or fallback locally.
-  - `GET /api/health`: Healthcheck endpoint for Render returning status and adapter modes.
-- [ ] Unit test Tu Vi Engine and API endpoints.
-
-## Phase 3: Frontend Development (`/client`)
-- [ ] Initialize `client` with Vite, React, TypeScript, TailwindCSS.
-- [ ] Configure Oriental Metaphysics Design System (`tailwind.config.js`, `index.css`):
-  - Light mode (Giấy Dó): `#FBF8F1`, text `#1C1917`, accents `#8B1E1E` (Đỏ Son) and `#B8860B` (Vàng Kim), 1px border `#E5DFD3`.
-  - Dark mode (Huyền Đêm): `#121110`, text `#EAE3D2`, accents `#D4A373` and `#991B1B`.
-  - Typography: Serif font (`Playfair Display` / `Noto Serif`) for titles & palaces, Sans-serif (`Inter` / `Be Vietnam Pro`) for interpretation body.
-- [ ] Components:
-  - `Header`: Title "Tử Vi Minh Khuê", Dark/Light toggle, quick navigation.
-  - `ChartForm`: Lunar/Solar toggle, leap month support, name, gender, birth date/time picker (12 Canh Giờ Tý-Hợi), viewing year, "Điền mẫu nhanh" button.
-  - `ChartGrid` (4x4 Matrix):
-    * 12 outer boxes for 12 Palaces (Tý, Sửu, Dần, Mão, Thìn, Tỵ, Ngọ, Mùi, Thân, Dậu, Tuất, Hợi).
-    * Center 2x2 for Thiên Bàn (Họ tên, ngày giờ sinh âm/dương, Mệnh, Cục, Thân cư, Bản Mệnh...).
-    * Each palace shows Palace Name, Major stars with Brightness (M/V/Đ/B/H) and Ngũ hành colors, Minor stars (good stars green/blue, bad stars red/purple), Dai Han, Tieu Han, Tuan/Triet badges.
-    * Interactive selection: Clicking any palace activates SVG lines for **Tam Phương Tứ Chính** (Chính chiếu, Tam hợp 1, Tam hợp 2) linking center coordinates.
-  - `InterpretationView`: 3 Tabs (Tổng Quan, Chi Tiết Cung Đang Chọn, Vận Hạn) synced with the selected palace.
-  - `ExportPanel`: PNG export utility (clean canvas rendering) and chart history drawer.
-  - `vercel.json` routing configuration.
-
-## Phase 4: Playwright E2E Testing & Zero-Error Verification
-- [ ] Setup Playwright in project (`playwright.config.ts`, tests in `/e2e` or `/client/e2e`).
-- [ ] Write comprehensive E2E test specs:
-  - Homepage clean render (no console errors, no 4xx/5xx).
-  - Quick sample fill and form submission.
-  - Chart display verification (12 palaces + Thien Ban present and populated).
-  - Palace click & SVG Tam Phương Tứ Chính rendering verification.
-  - Tab navigation and interpretation synchronization.
-  - Dark/Light theme switching.
-  - Responsive tests on Desktop (`1440x900`) and Mobile (`390x844`).
-- [ ] Execute `npm run build` on both `/server` and `/client`.
-- [ ] Run Playwright tests and fix any issues until 100% pass.
-
-## Phase 5: Code Review, Documentation & Git Push
-- [ ] Review codebase with `@requesting-code-review` guidelines.
-- [ ] Verify `.env` is uncommitted and `.gitignore` is intact.
-- [ ] Write `README.md` with instructions for Render and Vercel deployments.
-- [ ] Commit all work with conventional commit message:
-  `feat: complete Tu Vi astrology full-stack web app with Playwright E2E verified`
-- [ ] Push to `https://github.com/minhkhueit1999/tuvilaso_WEB` on branch `main`.
+## 2. Các Bước Triển Khai
+1. **Engine Backend & Shared Engine (`/server/src/engine/tuvi/` & `/client/src/engine/`)**:
+   - Mở rộng `types.ts` với đầy đủ schemas: `TuViSchool`, `Star` (110+ sao, `weight`, `side`, `sinhNienHoa`, `tuHoaLyTam`, `tuHoaHuongTam`), `PhiHoaDetail`, `LaiNhanCung`, `LuuNguyet`.
+   - Cập nhật `stars.ts`: Bổ sung toàn bộ Vòng Bác Sĩ (12 sao theo chiều âm dương nam nữ), Phụ tinh Năm/Tháng/Ngày/Giờ, Lưu Niên 15 sao, tính Tự Hóa Ly Tâm & Hướng Tâm, Phi Tinh 4 Hóa theo 10 Thiên Can.
+   - Cập nhật `palaces.ts`: Tính Lai Nhân Cung (Can năm sinh = Can cung), Đẩu Quân & 12 Lưu Nguyệt, 12 Đại Vận & Lưu Niên cung.
+   - Cập nhật `interpreter.ts`: Luận giải đa trường phái (Cách Cục Nam Phái, Tứ Hóa Bắc Phái, Phi Tinh Tương Tác).
+   - Đồng bộ hoàn toàn sang `/client/src/engine/`.
+2. **Design Tokens & Thẩm Mỹ Cổ Tịch Trung Hoa**:
+   - `client/tailwind.config.js`: Bảng màu Tuyên Chỉ `#F5F0E3`, Sơn Mài `#141210`, Mực Tùng Yên `#1C1915`, Đỏ Chu Sa `#9E2A22`, Cổ Đồng Kim `#9A7B3E`, Thanh Ngọc `#245B43`, Thiên Thanh `#234B6E`.
+   - `client/src/index.css`: Vân sợi giấy SVG noise mịn (`opacity: 0.03`), khung song biên (`frame-double`), con dấu ấn triện vuông (`seal-stamp`), họa tiết hồi văn góc (`meander-corner`).
+   - Xóa bỏ toàn bộ gradient SaaS, glow, bo góc mập, thay thế 100% emoji bằng SVG icons nét mảnh `1.25px`.
+3. **UI Components Chuẩn 3 Tầng & 4 Trường Phái**:
+   - `SchoolSwitcher.tsx`: Thanh chọn 4 trường phái dạng thẻ bài mộc bản.
+   - `Header.tsx`: Logo Bát Quái nét mảnh, chữ Thư pháp Noto Serif, theme toggle.
+   - `ChartForm.tsx`: Khung Song Biên viền Cổ Đồng Kim, góc Hồi Văn, font Noto Serif + Be Vietnam Pro.
+   - `ChartGrid.tsx`: Bố cục 3 tầng sắc nét từng ô, Tuần/Triệt chữ nhật đen mực, Thiên Bàn khung song biên có watermark Bát Quái + ấn triện đỏ, vẽ đường SVG Tam Phương Tứ Chính và 4 đường Phi Tinh (Lộc, Quyền, Khoa, Kỵ).
+   - `InterpretationTabs.tsx`: Tích hợp 4 chế độ luận giải.
+   - `TuViAssistant.tsx`: Trợ lý luận đoán theo trường phái.
+   - `ExportModal.tsx`: Canvas 2D vẽ ảnh đúng vân Tuyên Chỉ, khung song biên và bố cục 3 tầng.
+4. **Kiểm Thử & Đóng Gói**:
+   - Unit tests engine trong `server/tests/`.
+   - Playwright E2E trong `e2e/tuvi.spec.ts` (kiểm tra 4 trường phái, bố cục 3 tầng, SVG Phi Tinh, mobile responsive, xuất ảnh).
+   - Chạy build và test, tự động sửa lỗi, git commit & push.

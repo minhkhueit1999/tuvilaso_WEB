@@ -2,13 +2,13 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import multer from 'multer';
-import { generateTuViChart, TuViInput } from './engine/tuvi/index.js';
+import { generateTuViChart, answerTuViQuestion, TuViInput } from './engine/tuvi/index.js';
 import { getDatabaseStatus, saveChartRecord, getRecentChartRecords, getChartRecordById } from './config/db.js';
 import { uploadImageBuffer, isCloudinaryConfigured } from './services/storageService.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 export const app = express();
@@ -50,7 +50,10 @@ app.post('/api/laso/generate', async (req: Request, res: Response, next: NextFun
       hour,
       minute,
       isLeapMonth,
-      viewingYear
+      viewingYear,
+      school,
+      showTamPhuongTuChinh,
+      showLuuNien
     } = req.body;
 
     if (!day || !month || !year) {
@@ -71,7 +74,10 @@ app.post('/api/laso/generate', async (req: Request, res: Response, next: NextFun
       hour: Number(hour ?? 12),
       minute: Number(minute ?? 0),
       isLeapMonth: Boolean(isLeapMonth),
-      viewingYear: Number(viewingYear ?? 2026)
+      viewingYear: Number(viewingYear ?? 2026),
+      school: school || 'tong_hop',
+      showTamPhuongTuChinh: showTamPhuongTuChinh ?? true,
+      showLuuNien: showLuuNien ?? true
     };
 
     const chart = generateTuViChart(input);
@@ -86,7 +92,29 @@ app.post('/api/laso/generate', async (req: Request, res: Response, next: NextFun
   }
 });
 
-// 3. Get Chart History
+// 3. Ask Tu Vi AI Assistant
+app.post('/api/laso/ask', (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { chart, question, selectedPalaceName, school } = req.body;
+    if (!chart || !question) {
+      res.status(400).json({
+        success: false,
+        error: 'Vui lòng cung cấp dữ liệu lá số và câu hỏi cần tư vấn.'
+      });
+      return;
+    }
+
+    const result = answerTuViQuestion(chart, question, selectedPalaceName, school || chart.school);
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// 4. Get Chart History
 app.get('/api/laso/history', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 12, 50);
@@ -101,7 +129,7 @@ app.get('/api/laso/history', async (req: Request, res: Response, next: NextFunct
   }
 });
 
-// 4. Get Chart by ID
+// 5. Get Chart by ID
 app.get('/api/laso/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
@@ -122,7 +150,7 @@ app.get('/api/laso/:id', async (req: Request, res: Response, next: NextFunction)
   }
 });
 
-// 5. Upload Chart Image (Cloudinary with Local Fallback)
+// 6. Upload Chart Image (Cloudinary with Local Fallback)
 app.post('/api/laso/upload-image', upload.single('image'), async (req: Request, res: Response, next: NextFunction) => {
   try {
     let buffer: Buffer | null = null;

@@ -73,4 +73,61 @@ describe('Tử Vi Engine - Core Calculations', () => {
     expect(chart.interpretation.palaces['Mệnh']).toBeTruthy();
     expect(chart.interpretation.luckFortune.currentDecade).toBeTruthy();
   });
+
+  it('should support 110+ stars, Lai Nhan Cung, Tu Hoa, and 4 schools', () => {
+    const input: TuViInput = {
+      fullName: 'Tống Minh Khuê',
+      gender: 'male',
+      calendarType: 'solar',
+      day: 28,
+      month: 10,
+      year: 1999,
+      hour: 9,
+      minute: 30,
+      school: 'phi_tinh'
+    };
+
+    const chart = generateTuViChart(input);
+
+    // 1. Kiểm tra tổng số sao trên lá số >= 110
+    let totalStars = 0;
+    for (const p of chart.palaces) {
+      totalStars += p.majorStars.length + p.minorStars.length;
+    }
+    expect(totalStars).toBeGreaterThanOrEqual(110);
+
+    // 2. Kiểm tra Lai Nhân Cung (Năm Kỷ Mão -> Can Kỷ -> Cung mang Can Kỷ là Lai Nhân Cung)
+    const laiNhan = chart.palaces.find(p => p.isLaiNhan);
+    expect(laiNhan).toBeDefined();
+    expect(laiNhan?.can).toBe('Kỷ');
+    expect(chart.laiNhanPalaceId).toBe(laiNhan?.id);
+
+    // 3. Kiểm tra Bảng Phi Tinh Tứ Hóa có đủ 12 cung
+    expect(Object.keys(chart.phiHoaTable).length).toBe(12);
+    const menhPhi = chart.phiHoaTable[chart.palaces.find(p => p.isMenh)!.id];
+    expect(menhPhi.loc).toBeDefined();
+    expect(menhPhi.quyen).toBeDefined();
+    expect(menhPhi.khoa).toBeDefined();
+    expect(menhPhi.ky).toBeDefined();
+    expect(menhPhi.summaryText).toContain('Phi Lộc');
+
+    // 4. Kiểm tra cấu trúc 3 tầng các thuộc tính trong Palace
+    const p0 = chart.palaces[0];
+    expect(p0.shortCanChi).toBeTruthy();
+    expect(p0.branchYinYangElement).toBeTruthy();
+    expect(p0.daiHanPalaceName).toContain('ĐV.');
+    expect(p0.luuNienPalaceName).toContain('LN.');
+    expect(p0.luuNguyet).toBeGreaterThanOrEqual(1);
+    expect(p0.luuNguyet).toBeLessThanOrEqual(12);
+
+    // 5. Kiểm tra các trường phái
+    const chartNamPhai = generateTuViChart({ ...input, school: 'nam_phai' });
+    expect(chartNamPhai.school).toBe('nam_phai');
+    expect(chartNamPhai.interpretation.classicPattern).toBeDefined();
+
+    const chartBacPhai = generateTuViChart({ ...input, school: 'bac_phai' });
+    expect(chartBacPhai.school).toBe('bac_phai');
+    expect(chartBacPhai.interpretation.khamThienMon).toBeDefined();
+  });
 });
+

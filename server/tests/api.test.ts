@@ -31,6 +31,7 @@ describe('Server API Endpoints', () => {
     expect(res.body.data.thienBan.fullName).toBe('Nguyễn Văn A');
     expect(res.body.data.palaces.length).toBe(12);
     expect(res.body.data.interpretation).toBeDefined();
+    expect(res.body.data.interpretation.aspectScores).toBeDefined();
   });
 
   it('GET /api/laso/history should return array of charts', async () => {
@@ -52,5 +53,33 @@ describe('Server API Endpoints', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.url).toBeDefined();
+  });
+
+  it('POST /api/laso/ask should answer questions based on chart context', async () => {
+    const genRes = await request(app)
+      .post('/api/laso/generate')
+      .send({
+        fullName: 'Nguyễn Văn A',
+        gender: 'male',
+        calendarType: 'solar',
+        day: 1,
+        month: 1,
+        year: 1995,
+        hour: 10,
+        minute: 0
+      });
+    const chart = genRes.body.data;
+
+    const askRes = await request(app)
+      .post('/api/laso/ask')
+      .send({
+        chart,
+        question: 'Xem sự nghiệp của tôi thế nào?'
+      });
+
+    expect(askRes.status).toBe(200);
+    expect(askRes.body.success).toBe(true);
+    expect(askRes.body.data.answer).toContain('sự nghiệp');
+    expect(askRes.body.data.advice).toBeDefined();
   });
 });

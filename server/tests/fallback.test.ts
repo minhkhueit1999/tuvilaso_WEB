@@ -53,3 +53,4 @@ describe('Resilient Fallback Mechanisms', () => {
     expect(res.public_id).toContain('test_chart.png');
   });
 });
+

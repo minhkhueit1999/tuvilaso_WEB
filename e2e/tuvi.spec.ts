@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
+test.describe('Tử Vi Huyền Cơ - E2E Verification', () => {
   test('1. Homepage loads cleanly with 0 console error and 0 4xx/5xx network errors', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -19,7 +19,7 @@ test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
     await page.goto('/');
 
     // Check header and form present
-    await expect(page.locator('h1')).toContainText('Tử Vi Minh Khuê');
+    await expect(page.locator('h1')).toContainText('Tử Vi');
     await expect(page.getByText('Nhập Thông Tin Lập Lá Số')).toBeVisible();
 
     // Verify no console errors and no network 4xx/5xx
@@ -27,56 +27,131 @@ test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
     expect(failedRequests).toEqual([]);
   });
 
-  test('2. Generate chart successfully, displaying 12 palaces, Thien Ban, and interpretation', async ({ page }) => {
+  test('2. Knowledge and Sample Charts Modals open and interact smoothly', async ({ page, isMobile }) => {
     await page.goto('/');
 
-    // Click "Điền mẫu nhanh"
-    await page.getByRole('button', { name: /Điền mẫu nhanh/i }).click();
+    if (!isMobile) {
+      // 1. Open Knowledge Modal from navigation
+      await page.getByRole('navigation').getByRole('button', { name: /Kiến Thức Tử Vi/i }).click();
+      await expect(page.getByText('Cẩm Nang Kiến Thức Tử Vi Đẩu Số')).toBeVisible();
+      await expect(page.getByText('1. Thập Tứ Chính Tinh')).toBeVisible();
+      await page.getByRole('button', { name: 'Đóng' }).click();
 
-    // Submit form
-    await page.getByRole('button', { name: /LẬP LÁ SỐ & LUẬN ĐOÁN/i }).click();
+      // 2. Open Sample Charts Modal from navigation
+      await page.getByRole('navigation').getByRole('button', { name: /Kho Lá Số Mẫu/i }).click();
+      await expect(page.getByText('Kho Lá Số Tử Vi Tiêu Biểu')).toBeVisible();
+      await expect(page.getByText('Đại Tướng Võ Nguyên Giáp')).toBeVisible();
+
+      // Select sample chart
+      await page.getByText('Đại Tướng Võ Nguyên Giáp').click();
+
+      // Should automatically generate and render the chart
+      const matrix = page.locator('#tuvi-laso-matrix');
+      await expect(matrix).toBeVisible({ timeout: 10000 });
+      await expect(matrix.getByText('Võ Nguyên Giáp')).toBeVisible();
+    } else {
+      // Mobile: use sample data button in form
+      await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+      await page.locator('button[type="submit"]').click();
+      await expect(page.locator('#tuvi-laso-matrix')).toBeVisible({ timeout: 10000 });
+    }
+  });
+
+  test('3. Generate chart successfully, displaying 3-tier palace layout, 110+ stars, Thien Ban, and 5-aspect scores', async ({ page }) => {
+    await page.goto('/');
+
+    // Click "Dùng dữ liệu mẫu"
+    await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+
+    // Submit form via submit button
+    await page.locator('button[type="submit"]').click();
 
     // Verify matrix is rendered
     const matrix = page.locator('#tuvi-laso-matrix');
     await expect(matrix).toBeVisible({ timeout: 10000 });
 
-    // Verify Thien Ban has full name
+    // Verify Thien Ban has full name and central data
     await expect(matrix.getByText('THIÊN BÀN TỬ VI')).toBeVisible();
     await expect(matrix.getByText('Tống Minh Khuê')).toBeVisible();
+    await expect(matrix.getByText('Lai Nhân Cung:')).toBeVisible();
 
-    // Verify Mệnh and Thân badges exist
-    await expect(matrix.getByText('MỆNH', { exact: true })).toBeVisible();
-    await expect(matrix.getByText('THÂN', { exact: true })).toBeVisible();
+    // Verify Mệnh and Thân seals exist
+    await expect(matrix.getByText('MỆNH', { exact: true }).first()).toBeVisible();
+    await expect(matrix.getByText('THÂN', { exact: true }).first()).toBeVisible();
 
-    // Verify Interpretation Tabs are present
-    await expect(page.getByText('Tổng Quan Bản Mệnh')).toBeVisible();
-    await expect(page.getByText('Luận Vận Hạn')).toBeVisible();
+    // Verify 3-Tier Palace Layout elements (ĐV, LN, Tràng Sinh)
+    await expect(matrix.locator('text=/ĐV\\./i').first()).toBeVisible();
+    await expect(matrix.locator('text=/LN\\./i').first()).toBeVisible();
+
+    // Verify 5-Aspect rating bars exist in Tab 1
+    await expect(page.getByText(/Tổng Quan Mệnh Cục/i)).toBeVisible();
+    await expect(page.getByText('Công Danh - Sự Nghiệp')).toBeVisible();
+    await expect(page.getByText('Tài Lộc - Điền Sản')).toBeVisible();
   });
 
-  test('3. Clicking a palace renders SVG Tam Phương Tứ Chính and synchronizes interpretation', async ({ page }) => {
+  test('4. School Switcher toggles 4 Schools: Nam Phái, Bắc Phái, Phi Tinh, and Tổng Hợp', async ({ page }) => {
     await page.goto('/');
 
     // Generate chart
-    await page.getByRole('button', { name: /Điền mẫu nhanh/i }).click();
-    await page.getByRole('button', { name: /LẬP LÁ SỐ & LUẬN ĐOÁN/i }).click();
-    await expect(page.locator('#tuvi-laso-matrix')).toBeVisible();
+    await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+    await page.locator('button[type="submit"]').click();
+    const matrix = page.locator('#tuvi-laso-matrix');
+    await expect(matrix).toBeVisible({ timeout: 10000 });
 
-    // Verify initial SVG overlay exists
-    const svgLayer = page.locator('#tuvi-laso-matrix svg');
-    await expect(svgLayer).toBeVisible();
-    await expect(svgLayer.locator('polygon')).toBeVisible();
-    await expect(svgLayer.locator('line')).toBeVisible();
+    // 1. Switch to Phi Tinh school
+    const phiTinhBtn = page.getByRole('button', { name: /Phi Tinh/i }).first();
+    await phiTinhBtn.click();
 
-    // Click on another palace in the matrix, e.g. "Phúc Đức"
-    const phucDucPalace = page.locator('#tuvi-laso-matrix').getByText('Phúc Đức', { exact: true }).first();
-    await phucDucPalace.click();
+    // Click on a palace in the matrix to trigger flying star arrows
+    const palaceCell = matrix.locator('div[data-palace-id]').first();
+    await palaceCell.click();
 
-    // Switch to tab "Chi Tiết 12 Cung"
-    await page.getByRole('button', { name: /Chi Tiết 12 Cung/i }).click();
-    await expect(page.getByText(/Cung Phúc Đức tại/i)).toBeVisible();
+    // Verify SVG flying arrows overlay is present
+    const phiTinhSvg = matrix.locator('svg defs marker#arrow-loc');
+    await expect(phiTinhSvg).toBeAttached();
+
+    // Verify Phi Tinh decoding panel is visible below the matrix
+    await expect(page.getByText(/PHI TINH TỨ HÓA TỪ CUNG/i)).toBeVisible();
+
+    // 2. Switch to Bắc Phái school
+    const bacPhaiBtn = page.getByRole('button', { name: /Bắc Phái/i }).first();
+    await bacPhaiBtn.click();
+    await expect(matrix.getByText('LAI NHÂN').first()).toBeVisible();
+
+    // 3. Switch to Nam Phái school
+    const namPhaiBtn = page.getByRole('button', { name: /Nam Phái/i }).first();
+    await namPhaiBtn.click();
+    await expect(page.getByText(/Cách Cục Nam Phái:/i)).toBeVisible();
+
+    // 4. Switch back to Tổng Hợp school and verify Tam Phương Tứ Chính
+    const tongHopBtn = page.getByRole('button', { name: /Tổng Hợp/i }).first();
+    await tongHopBtn.click();
+    const svgOverlay = matrix.locator('svg.pointer-events-none');
+    await expect(svgOverlay).toBeVisible();
+    await expect(svgOverlay.locator('polygon')).toBeVisible();
   });
 
-  test('4. Toggle Light/Dark mode seamlessly', async ({ page }) => {
+  test('5. Tu Vi AI Assistant chatbox responds with guidance', async ({ page }) => {
+    await page.goto('/');
+
+    // Generate chart
+    await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator('#tuvi-laso-matrix')).toBeVisible({ timeout: 10000 });
+
+    // Verify Tu Vi Assistant heading is visible
+    await expect(page.getByRole('heading', { name: /Trợ Lý Tử Vi Huyền Cơ/i })).toBeVisible();
+
+    // Click quick question pill
+    const quickBtn = page.getByRole('button', { name: 'Sự nghiệp & Công danh của tôi' });
+    await expect(quickBtn).toBeVisible();
+    await quickBtn.click();
+
+    // Verify assistant responds with advice
+    await expect(page.getByText(/Lời Khuyên Hành Xử|Định hướng phát triển/i)).toBeVisible({ timeout: 10000 });
+  });
+
+  test('6. Toggle Light/Dark mode seamlessly', async ({ page }) => {
     await page.goto('/');
 
     const html = page.locator('html');
@@ -94,16 +169,16 @@ test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
     expect(isDarkAfter).not.toBe(isDarkNow);
   });
 
-  test('5. Open Export modal and verify image generation flow', async ({ page }) => {
+  test('7. Open Export modal and verify image generation flow', async ({ page }) => {
     await page.goto('/');
 
     // Generate chart first
-    await page.getByRole('button', { name: /Điền mẫu nhanh/i }).click();
-    await page.getByRole('button', { name: /LẬP LÁ SỐ & LUẬN ĐOÁN/i }).click();
-    await expect(page.locator('#tuvi-laso-matrix')).toBeVisible();
+    await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator('#tuvi-laso-matrix')).toBeVisible({ timeout: 10000 });
 
     // Click "Xuất Ảnh PNG"
-    await page.getByRole('button', { name: /Xuất Ảnh PNG/i }).click();
+    await page.getByRole('button', { name: /Xuất Ảnh PNG/i }).first().click();
 
     // Export modal should appear
     await expect(page.getByText('Xuất Ảnh Lá Số Tử Vi')).toBeVisible();
@@ -111,6 +186,6 @@ test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
     await expect(page.getByRole('button', { name: /Lưu Trữ Ảnh Lên Máy Chủ/i })).toBeVisible();
 
     // Close modal
-    await page.locator('div[role="dialog"], div.fixed button').filter({ hasText: '' }).first().click();
+    await page.getByRole('button', { name: 'Đóng' }).click();
   });
 });

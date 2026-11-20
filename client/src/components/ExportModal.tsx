@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
-import { Download, Share2, X, Check, Loader2 } from 'lucide-react';
+import { IconAnTrien } from './OrientalIcons';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -28,10 +28,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
     setIsExporting(true);
     try {
+      const isDark = document.documentElement.classList.contains('dark');
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#121110' : '#FBF8F1'
+        backgroundColor: isDark ? '#141210' : '#F5F0E3'
       });
       const dataUrl = canvas.toDataURL('image/png');
       setExportedUrl(dataUrl);
@@ -54,7 +55,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const el = document.getElementById(chartElementId);
       if (!el) return;
       setIsUploading(true);
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+      const isDark = document.documentElement.classList.contains('dark');
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: isDark ? '#141210' : '#F5F0E3'
+      });
       dataUrl = canvas.toDataURL('image/png');
       setExportedUrl(dataUrl);
     }
@@ -81,24 +87,31 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-      <div className="bg-paper-card dark:bg-night-card border border-paper-border dark:border-night-border rounded-lg max-w-md w-full p-5 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+      <div className="bg-paper-card dark:bg-night-card border-2 border-paper-gold/80 dark:border-night-gold/80 rounded-none max-w-md w-full p-5 shadow-lg relative">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-paper-sub hover:text-paper-text dark:text-night-sub dark:hover:text-night-text"
+          aria-label="Đóng"
+          className="absolute top-3 right-3 text-paper-muted hover:text-paper-text dark:text-night-muted dark:hover:text-night-text cursor-pointer p-1"
         >
-          <X className="w-5 h-5" />
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
 
-        <h3 className="font-serif text-lg font-bold text-paper-red dark:text-night-gold mb-2">
-          Xuất Ảnh Lá Số Tử Vi
-        </h3>
-        <p className="text-xs text-paper-sub dark:text-night-sub mb-4">
-          Tải ảnh chất lượng cao để lưu trữ hoặc chia sẻ với bạn bè, đồng môn.
+        <div className="flex items-center gap-2 mb-2">
+          <IconAnTrien className="w-5 h-5 text-paper-gold" />
+          <h3 className="font-serif text-lg font-bold text-paper-red dark:text-night-gold">
+            Xuất Ảnh Lá Số Tử Vi Mộc Bản
+          </h3>
+        </div>
+        <p className="text-xs text-paper-muted dark:text-night-muted mb-4">
+          Tải ảnh chất lượng cao chuẩn nền Giấy Tuyên Chỉ, khung song biên và bố cục 3 tầng.
         </p>
 
         {exportedUrl && (
-          <div className="mb-4 border border-paper-border rounded overflow-hidden max-h-48 flex justify-center bg-paper-bg dark:bg-night-bg">
+          <div className="mb-4 border border-paper-border rounded-none overflow-hidden max-h-48 flex justify-center bg-paper-bg dark:bg-night-bg">
             <img src={exportedUrl} alt="Lá số Tử Vi" className="object-contain h-full" />
           </div>
         )}
@@ -107,16 +120,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <button
             onClick={handleCapture}
             disabled={isExporting}
-            className="w-full py-2.5 px-4 rounded text-xs sm:text-sm font-semibold bg-paper-red hover:bg-paper-red/90 text-white dark:bg-night-gold dark:text-night-bg dark:hover:bg-night-gold/90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-none text-xs sm:text-sm font-serif font-bold bg-paper-red hover:bg-paper-redHover text-paper-bg dark:bg-night-red dark:text-night-bg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border border-paper-redHover"
           >
             {isExporting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang kết xuất ảnh chất lượng cao...</span>
+                <div className="w-4 h-4 border-2 border-paper-bg border-t-transparent animate-spin" />
+                <span>Đang kết xuất ảnh mộc bản...</span>
               </>
             ) : (
               <>
-                <Download className="w-4 h-4" />
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                </svg>
                 <span>TẢI ẢNH VỀ MÁY (PNG)</span>
               </>
             )}
@@ -125,34 +140,33 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <button
             onClick={handleUploadCloud}
             disabled={isUploading}
-            className="w-full py-2 px-4 rounded text-xs sm:text-sm font-medium border border-paper-border dark:border-night-border hover:bg-paper-bg dark:hover:bg-night-bg text-paper-text dark:text-night-text transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-2 px-4 rounded-none text-xs sm:text-sm font-medium border border-paper-border dark:border-night-border hover:bg-paper-cardAlt dark:hover:bg-night-cardAlt text-paper-text dark:text-night-text transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isUploading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang tải lên máy chủ...</span>
+                <div className="w-4 h-4 border-2 border-paper-gold border-t-transparent animate-spin" />
+                <span>Đang lưu trữ lên máy chủ...</span>
               </>
             ) : cloudUrl ? (
               <>
-                <Check className="w-4 h-4 text-emerald-600" />
-                <span>Đã lưu lên máy chủ!</span>
+                <span className="text-paper-jade font-bold">Đã lưu trữ thành công!</span>
               </>
             ) : (
               <>
-                <Share2 className="w-4 h-4 text-paper-gold dark:text-night-gold" />
+                <IconAnTrien className="w-4 h-4 text-paper-gold" />
                 <span>Lưu Trữ Ảnh Lên Máy Chủ</span>
               </>
             )}
           </button>
 
           {cloudUrl && (
-            <div className="p-2 rounded bg-paper-bg dark:bg-night-bg border border-paper-border text-[11px] break-all">
-              <span className="font-semibold text-paper-sub block mb-0.5">Đường dẫn ảnh:</span>
+            <div className="p-2.5 rounded-none bg-paper-cardAlt dark:bg-night-cardAlt border border-paper-border text-[11px] break-all">
+              <span className="font-semibold text-paper-muted block mb-0.5">Đường dẫn ảnh đã lưu:</span>
               <a
                 href={cloudUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-paper-red dark:text-night-gold underline"
+                className="text-paper-red dark:text-night-gold underline font-serif"
               >
                 {cloudUrl}
               </a>

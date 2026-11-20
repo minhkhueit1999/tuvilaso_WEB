@@ -136,3 +136,4 @@ export function calculateCuc(canYear: string, menhChiIndex: number): CucInfo {
       return { name: 'Thủy Nhị Cục', number: 2, element: 'Thuy' };
   }
 }
+

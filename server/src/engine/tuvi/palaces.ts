@@ -32,6 +32,21 @@ export const PALACE_ELEMENTS: ElementType[] = [
   'Thuy'  // Hợi
 ];
 
+export const BRANCH_YINYANG_ELEMENT: string[] = [
+  '+Thuỷ', // Tý: Dương Thủy
+  '-Thổ',  // Sửu: Âm Thổ
+  '+Mộc',  // Dần: Dương Mộc
+  '-Mộc',  // Mão: Âm Mộc
+  '+Thổ',  // Thìn: Dương Thổ
+  '-Hoả',  // Tỵ: Âm Hỏa
+  '+Hoả',  // Ngọ: Dương Hỏa
+  '-Thổ',  // Mùi: Âm Thổ
+  '+Kim',  // Thân: Dương Kim
+  '-Kim',  // Dậu: Âm Kim
+  '+Thổ',  // Tuất: Dương Thổ
+  '-Thuỷ'  // Hợi: Âm Thủy
+];
+
 // Layout 4x4 chuẩn Tử Vi truyền thống:
 // Hàng 0: Tỵ (0,0), Ngọ (0,1), Mùi (0,2), Thân (0,3)
 // Hàng 1: Thìn (1,0) ... Dậu (1,3)
@@ -96,53 +111,95 @@ export function buildTamPhuongTuChinh(): Record<number, TamPhuongTuChinh> {
   for (let i = 0; i < 12; i++) {
     res[i] = {
       palaceId: i,
-      palaceName: '', // Sẽ cập nhật sau khi map tên cung
+      palaceName: '',
       branch: CHI_NAMES[i],
-      xungChieu: (i + 6) % 12,
       tamHop: [(i + 4) % 12, (i + 8) % 12],
+      xungChieu: (i + 6) % 12,
       nhiHop: NHI_HOP_MAP[i]
     };
   }
   return res;
 }
 
-// Tính Đại Hạn (10 năm một cung)
-export function calculateDaiHan(menhIndex: number, cuc: CucInfo, isThuan: boolean): Record<number, number> {
-  const daiHanMap: Record<number, number> = {};
-  const startAge = cuc.number;
+// Tính tuổi Đại Vận (10 năm một vận)
+export function calculateDaiHan(cuc: CucInfo, isThuan: boolean, menhIndex: number): Record<number, number> {
+  const res: Record<number, number> = {};
+  const startAge = cuc.number; // 2 (Thủy), 3 (Mộc), 4 (Kim), 5 (Thổ), 6 (Hỏa)
 
   for (let step = 0; step < 12; step++) {
     const palaceIndex = isThuan
       ? (menhIndex + step) % 12
       : (menhIndex - step + 12) % 12;
-    daiHanMap[palaceIndex] = startAge + step * 10;
+    res[palaceIndex] = startAge + step * 10;
   }
-
-  return daiHanMap;
+  return res;
 }
 
-// Tính Tiểu Hạn (1 năm một cung)
+// Tính Tiểu Hạn theo Chi năm sinh và giới tính
 export function calculateTieuHan(chiYear: string, gender: Gender): Record<number, string> {
   const chiYearIndex = CHI_NAMES.indexOf(chiYear);
-  // Xác định cung khởi Tiểu Hạn theo tam hợp chi năm:
-  // Dần Ngọ Tuất (2, 6, 10) -> khởi Thìn (4)
-  // Thân Tý Thìn (8, 0, 4) -> khởi Tuất (10)
-  // Tỵ Dậu Sửu (5, 9, 1) -> khởi Mùi (7)
-  // Hợi Mão Mùi (11, 3, 7) -> khởi Sửu (1)
-  let startChiIndex = 4;
-  if ([8, 0, 4].includes(chiYearIndex)) startChiIndex = 10;
-  else if ([5, 9, 1].includes(chiYearIndex)) startChiIndex = 7;
-  else if ([11, 3, 7].includes(chiYearIndex)) startChiIndex = 1;
+  let startBranchIndex = 0;
 
-  const tieuHanMap: Record<number, string> = {};
-  const isMale = gender === 'male';
-
-  for (let i = 0; i < 12; i++) {
-    const palaceIndex = isMale
-      ? (startChiIndex + i) % 12
-      : (startChiIndex - i + 12) % 12;
-    tieuHanMap[palaceIndex] = CHI_NAMES[i];
+  if ([2, 6, 10].includes(chiYearIndex)) {
+    // Dần Ngọ Tuất -> Khởi tại Thìn (4)
+    startBranchIndex = 4;
+  } else if ([8, 0, 4].includes(chiYearIndex)) {
+    // Thân Tý Thìn -> Khởi tại Tuất (10)
+    startBranchIndex = 10;
+  } else if ([5, 9, 1].includes(chiYearIndex)) {
+    // Tỵ Dậu Sửu -> Khởi tại Mùi (7)
+    startBranchIndex = 7;
+  } else if ([11, 3, 7].includes(chiYearIndex)) {
+    // Hợi Mão Mùi -> Khởi tại Sửu (1)
+    startBranchIndex = 1;
   }
 
-  return tieuHanMap;
+  const isNam = gender === 'male';
+  const res: Record<number, string> = {};
+
+  for (let i = 0; i < 12; i++) {
+    const branchForPalace = isNam
+      ? (startBranchIndex + i) % 12
+      : (startBranchIndex - i + 12) % 12;
+    res[i] = CHI_NAMES[branchForPalace];
+  }
+  return res;
+}
+
+// Tính tên Cung Đại Vận (ĐV.MỆNH, ĐV.PHỤ, ĐV.PHỐI...)
+export function calculateDaiHanPalaceNames(menhIndex: number, currentDecadePalaceId: number): Record<number, string> {
+  const SHORT_NAMES = [
+    'MỆNH', 'PHỤ', 'PHÚC', 'ĐIỀN', 'QUAN', 'NÔ', 'DI', 'TẬT', 'TÀI', 'TỬ', 'PHỐI', 'HUYNH'
+  ];
+  const res: Record<number, string> = {};
+  for (let i = 0; i < 12; i++) {
+    const offset = (i - currentDecadePalaceId + 12) % 12;
+    res[i] = `ĐV.${SHORT_NAMES[offset]}`;
+  }
+  return res;
+}
+
+// Tính tên Cung Lưu Niên (LN.MỆNH, LN.HUYNH...) theo Chi năm xem hạn
+export function calculateLuuNienPalaceNames(menhIndex: number, chiViewingYearIndex: number): Record<number, string> {
+  const SHORT_NAMES = [
+    'MỆNH', 'PHỤ', 'PHÚC', 'ĐIỀN', 'QUAN', 'NÔ', 'DI', 'TẬT', 'TÀI', 'TỬ', 'PHỐI', 'HUYNH'
+  ];
+  const res: Record<number, string> = {};
+  for (let i = 0; i < 12; i++) {
+    const offset = (i - chiViewingYearIndex + 12) % 12;
+    res[i] = `LN.${SHORT_NAMES[offset]}`;
+  }
+  return res;
+}
+
+// Tính vị trí Đẩu Quân và 12 tháng Lưu Nguyệt
+export function calculateLuuNguyet(chiYearIndex: number, lunarMonth: number, chiHourIndex: number): Record<number, number> {
+  // Đẩu Quân: Khởi Thái Tuế (chiYearIndex), đếm nghịch đến tháng sinh, từ đó coi là giờ Tý đếm thuận đến giờ sinh:
+  const dauQuanPos = ((chiYearIndex - (lunarMonth - 1) + 12) + chiHourIndex) % 12;
+  const res: Record<number, number> = {};
+  for (let m = 1; m <= 12; m++) {
+    const palaceId = (dauQuanPos + (m - 1)) % 12;
+    res[palaceId] = m; // Tháng m
+  }
+  return res;
 }
