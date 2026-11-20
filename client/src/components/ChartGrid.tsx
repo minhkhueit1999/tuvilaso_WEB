@@ -102,7 +102,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
 
   // Copy Summary Handler
   const handleCopySummary = () => {
-    const summary = `TỬ VI HUYỀN CƠ — LÁ SỐ MỘC BẢN\nĐương số: ${thienBan.fullName} (${thienBan.gender})\nNgày sinh Dương lịch: ${thienBan.solarDate}\nNgày sinh Âm lịch: ${thienBan.lunarDate}\nGiờ sinh: ${thienBan.birthHour}\nCan Chi Bát Tự: ${thienBan.canChiYear} • ${thienBan.canChiMonth} • ${thienBan.canChiDay} • ${thienBan.canChiHour}\nBản Mệnh: ${thienBan.banMenh} | Cục: ${thienBan.cuc}\nChủ Mệnh: ${thienBan.chuMenh} | Chủ Thân: ${thienBan.chuThan}\nLai Nhân Cung: ${thienBan.laiNhanCung}\nNăm xem hạn: ${thienBan.viewingYear} (${thienBan.schoolName})`;
+    const summary = `TỬ VI MINH KHUÊ — LÁ SỐ MỘC BẢN\nĐương số: ${thienBan.fullName} (${thienBan.gender})\nNgày sinh Dương lịch: ${thienBan.solarDate}\nNgày sinh Âm lịch: ${thienBan.lunarDate}\nGiờ sinh: ${thienBan.birthHour}\nCan Chi Bát Tự: ${thienBan.canChiYear} • ${thienBan.canChiMonth} • ${thienBan.canChiDay} • ${thienBan.canChiHour}\nBản Mệnh: ${thienBan.banMenh} | Cục: ${thienBan.cuc}\nChủ Mệnh: ${thienBan.chuMenh} | Chủ Thân: ${thienBan.chuThan}\nLai Nhân Cung: ${thienBan.laiNhanCung}\nNăm xem hạn: ${thienBan.viewingYear} (${thienBan.schoolName})`;
     navigator.clipboard.writeText(summary);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -173,50 +173,50 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
             preserveAspectRatio="none"
           >
             <defs>
-              {/* Arrow Markers for Phi Tinh */}
-              <marker id="arrow-loc" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1 L 10 5 L 0 9 z" fill="#245B43" />
+              {/* Arrow Markers for Phi Tinh - Nhỏ gọn và nhạt trang nhã */}
+              <marker id="arrow-loc" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto-start-reverse">
+                <path d="M 0 2 L 8 5 L 0 8 z" fill="#245B43" fillOpacity="0.65" />
               </marker>
-              <marker id="arrow-quyen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1 L 10 5 L 0 9 z" fill="#C27803" />
+              <marker id="arrow-quyen" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto-start-reverse">
+                <path d="M 0 2 L 8 5 L 0 8 z" fill="#C27803" fillOpacity="0.65" />
               </marker>
-              <marker id="arrow-khoa" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1 L 10 5 L 0 9 z" fill="#234B6E" />
+              <marker id="arrow-khoa" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto-start-reverse">
+                <path d="M 0 2 L 8 5 L 0 8 z" fill="#234B6E" fillOpacity="0.65" />
               </marker>
-              <marker id="arrow-ky" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1 L 10 5 L 0 9 z" fill="#9E2A22" />
+              <marker id="arrow-ky" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto-start-reverse">
+                <path d="M 0 2 L 8 5 L 0 8 z" fill="#9E2A22" fillOpacity="0.7" />
               </marker>
             </defs>
 
-            {/* 1. Mode: Nam Phái & Tổng Hợp -> Tam Phương Tứ Chính */}
+            {/* 1. Mode: Nam Phái & Tổng Hợp -> Tam Phương Tứ Chính (Nét mảnh, thanh thoát, màu nhạt) */}
             {(currentSchool === 'nam_phai' || currentSchool === 'tong_hop') && showTamPhuongTuChinh && relation && (
               <g className="transition-all duration-300">
-                {/* Tam Hợp triangle */}
+                {/* Tam Hợp triangle (nét mảnh mộc bản, nền mờ nhẹ) */}
                 <polygon
                   points={`${pActive.x},${pActive.y} ${pTamHop1.x},${pTamHop1.y} ${pTamHop2.x},${pTamHop2.y}`}
-                  fill="rgba(154, 123, 62, 0.08)"
-                  stroke="#9A7B3E"
-                  strokeWidth="0.8"
+                  fill="rgba(154, 123, 62, 0.025)"
+                  stroke="rgba(154, 123, 62, 0.45)"
+                  strokeWidth="0.25"
                   strokeLinejoin="round"
                 />
-                {/* Xung Chiếu line (dashed red) */}
+                {/* Xung Chiếu line (đường đứt nét chu sa mảnh dịu) */}
                 <line
                   x1={pActive.x}
                   y1={pActive.y}
                   x2={pXungChieu.x}
                   y2={pXungChieu.y}
-                  stroke="#9E2A22"
-                  strokeWidth="0.9"
-                  strokeDasharray="2,2"
+                  stroke="rgba(158, 42, 34, 0.5)"
+                  strokeWidth="0.25"
+                  strokeDasharray="1.2,1.2"
                 />
-                <circle cx={pActive.x} cy={pActive.y} r="1.5" fill="#9E2A22" />
-                <circle cx={pXungChieu.x} cy={pXungChieu.y} r="1.2" fill="#9E2A22" />
-                <circle cx={pTamHop1.x} cy={pTamHop1.y} r="1.2" fill="#9A7B3E" />
-                <circle cx={pTamHop2.x} cy={pTamHop2.y} r="1.2" fill="#9A7B3E" />
+                <circle cx={pActive.x} cy={pActive.y} r="0.8" fill="#9E2A22" opacity="0.75" />
+                <circle cx={pXungChieu.x} cy={pXungChieu.y} r="0.7" fill="#9E2A22" opacity="0.65" />
+                <circle cx={pTamHop1.x} cy={pTamHop1.y} r="0.7" fill="#9A7B3E" opacity="0.65" />
+                <circle cx={pTamHop2.x} cy={pTamHop2.y} r="0.7" fill="#9A7B3E" opacity="0.65" />
               </g>
             )}
 
-            {/* 2. Mode: Phi Tinh -> 4 đường mũi tên Phi Hóa */}
+            {/* 2. Mode: Phi Tinh -> 4 đường mũi tên Phi Hóa (Mảnh và thanh nhã) */}
             {(currentSchool === 'phi_tinh') && activePhiDetail && (
               <g className="transition-all duration-300">
                 {/* Phi Lộc (Thanh Ngọc #245B43) */}
@@ -225,8 +225,8 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   y1={pActive.y}
                   x2={pPhiLoc.x}
                   y2={pPhiLoc.y}
-                  stroke="#245B43"
-                  strokeWidth="1.2"
+                  stroke="rgba(36, 91, 67, 0.55)"
+                  strokeWidth="0.3"
                   markerEnd="url(#arrow-loc)"
                 />
                 {/* Phi Quyền (Cổ Đồng Kim #C27803) */}
@@ -235,8 +235,8 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   y1={pActive.y}
                   x2={pPhiQuyen.x}
                   y2={pPhiQuyen.y}
-                  stroke="#C27803"
-                  strokeWidth="1.2"
+                  stroke="rgba(194, 120, 3, 0.55)"
+                  strokeWidth="0.3"
                   markerEnd="url(#arrow-quyen)"
                 />
                 {/* Phi Khoa (Thiên Thanh #234B6E) */}
@@ -245,8 +245,8 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   y1={pActive.y}
                   x2={pPhiKhoa.x}
                   y2={pPhiKhoa.y}
-                  stroke="#234B6E"
-                  strokeWidth="1.2"
+                  stroke="rgba(35, 75, 110, 0.55)"
+                  strokeWidth="0.3"
                   markerEnd="url(#arrow-khoa)"
                 />
                 {/* Phi Kỵ (Đỏ Chu Sa #9E2A22) */}
@@ -255,8 +255,8 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   y1={pActive.y}
                   x2={pPhiKy.x}
                   y2={pPhiKy.y}
-                  stroke="#9E2A22"
-                  strokeWidth="1.3"
+                  stroke="rgba(158, 42, 34, 0.6)"
+                  strokeWidth="0.35"
                   markerEnd="url(#arrow-ky)"
                 />
                 {/* Xung Chiếu từ cung nhận Kỵ */}
@@ -265,11 +265,11 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                   y1={pPhiKy.y}
                   x2={pPhiKyXung.x}
                   y2={pPhiKyXung.y}
-                  stroke="#9E2A22"
-                  strokeWidth="0.9"
-                  strokeDasharray="2,2"
+                  stroke="rgba(158, 42, 34, 0.4)"
+                  strokeWidth="0.25"
+                  strokeDasharray="1.2,1.2"
                 />
-                <circle cx={pActive.x} cy={pActive.y} r="1.8" fill="#1C1915" stroke="#9A7B3E" strokeWidth="0.5" />
+                <circle cx={pActive.x} cy={pActive.y} r="0.9" fill="#1C1915" stroke="#9A7B3E" strokeWidth="0.25" opacity="0.8" />
               </g>
             )}
           </svg>
@@ -299,7 +299,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
                       {/* Header */}
                       <div className="relative z-10 pt-1">
                         <div className="inline-block px-3 py-0.5 text-[10px] sm:text-xs font-serif font-bold text-paper-red dark:text-night-gold border border-paper-red/40 dark:border-night-gold/40 mb-1 tracking-widest">
-                          THIÊN BÀN TỬ VI HUYỀN CƠ
+                          THIÊN BÀN TỬ VI MINH KHUÊ
                         </div>
                         <h3 className="font-serif text-lg sm:text-2xl font-bold text-paper-text dark:text-night-text tracking-wide">
                           {thienBan.fullName}

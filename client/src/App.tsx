@@ -209,7 +209,7 @@ export const App: React.FC = () => {
             <span>ĐẨU SỐ TOÀN THƯ • KHÂM THIÊN BẮC PHÁI & NAM PHÁI</span>
           </div>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-paper-red dark:text-night-gold">
-            Tử Vi Huyền Cơ — Lập Lá Số & Luận Đoán
+            Tử Vi Minh Khuê — Lập Lá Số & Luận Đoán
           </h2>
           <p className="text-xs sm:text-sm text-paper-muted dark:text-night-muted">
             Quy chuẩn Can Chi Bát Tự, Ngũ Hành Nạp Âm, Cục số, Âm Dương thuận nghịch lý, an 14 Chính Tinh & Phụ Tinh,
@@ -293,7 +293,7 @@ export const App: React.FC = () => {
               activeSchool={currentSchool}
             />
 
-            {/* Hộp Tư Vấn Tử Vi Huyền Cơ (AI Assistant) */}
+            {/* Hộp Tư Vấn Tử Vi Minh Khuê (AI Assistant) */}
             <TuViAssistant
               chart={chart}
               selectedPalaceName={selectedPalace?.name || 'Mệnh'}
@@ -306,7 +306,7 @@ export const App: React.FC = () => {
       <footer className="border-t border-paper-border dark:border-night-border bg-paper-card dark:bg-night-card py-6 text-center text-xs text-paper-muted dark:text-night-muted">
         <div className="max-w-7xl mx-auto px-4 space-y-1">
           <p className="font-serif font-bold text-paper-red dark:text-night-gold">
-            Tử Vi Huyền Cơ • Tinh Hoa Đẩu Số Á Đông
+            Tử Vi Minh Khuê • Tinh Hoa Đẩu Số Á Đông
           </p>
           <p>
             Mọi luận đoán mang tính tham khảo và hướng thiện. Bản quyền © 2026.

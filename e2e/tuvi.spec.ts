@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Tử Vi Huyền Cơ - E2E Verification', () => {
+test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
   test('1. Homepage loads cleanly with 0 console error and 0 4xx/5xx network errors', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -140,7 +140,7 @@ test.describe('Tử Vi Huyền Cơ - E2E Verification', () => {
     await expect(page.locator('#tuvi-laso-matrix')).toBeVisible({ timeout: 10000 });
 
     // Verify Tu Vi Assistant heading is visible
-    await expect(page.getByRole('heading', { name: /Trợ Lý Tử Vi Huyền Cơ/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Trợ Lý Tử Vi Minh Khuê/i })).toBeVisible();
 
     // Click quick question pill
     const quickBtn = page.getByRole('button', { name: 'Sự nghiệp & Công danh của tôi' });

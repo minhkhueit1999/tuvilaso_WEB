@@ -26,7 +26,7 @@ export const TuViAssistant: React.FC<TuViAssistantProps> = ({ chart, selectedPal
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
       type: 'assistant',
-      content: `Xin chào đương số ${chart.thienBan.fullName}! Tôi là Trợ Lý Tử Vi Huyền Cơ. Bạn muốn giải đoán về Sự nghiệp, Tài lộc, Tình duyên, Vận hạn năm ${chart.thienBan.viewingYear}, hay khảo sát Lai Nhân Cung & Tứ Hóa Phi Tinh? Hãy chọn câu hỏi gợi ý bên dưới hoặc tự do đặt câu hỏi.`
+      content: `Xin chào đương số ${chart.thienBan.fullName}! Tôi là Trợ Lý Tử Vi Minh Khuê. Bạn muốn giải đoán về Sự nghiệp, Tài lộc, Tình duyên, Vận hạn năm ${chart.thienBan.viewingYear}, hay khảo sát Lai Nhân Cung & Tứ Hóa Phi Tinh? Hãy chọn câu hỏi gợi ý bên dưới hoặc tự do đặt câu hỏi.`
     }
   ]);
 
@@ -116,7 +116,7 @@ export const TuViAssistant: React.FC<TuViAssistantProps> = ({ chart, selectedPal
           </div>
           <div>
             <h3 className="font-serif text-sm sm:text-base font-bold text-paper-red dark:text-night-gold leading-tight">
-              Trợ Lý Tử Vi Huyền Cơ (AI)
+              Trợ Lý Tử Vi Minh Khuê (AI)
             </h3>
             <p className="text-[10px] text-paper-muted dark:text-night-muted">
               Luận giải chuyên sâu theo 4 trường phái • Ngữ cảnh cung {selectedPalaceName || 'Mệnh'}

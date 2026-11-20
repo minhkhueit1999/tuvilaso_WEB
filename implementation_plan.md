@@ -1,7 +1,7 @@
-# Kế Hoạch Hiện Thực Hóa: Tử Vi Huyền Cơ — Cổ Tịch Trung Hoa & 110+ Sao
+# Kế Hoạch Hiện Thực Hóa: Tử Vi Minh Khuê — Cổ Tịch Trung Hoa & 110+ Sao
 
 ## 1. Mục Tiêu Tổng Thể
-Nâng cấp toàn diện ứng dụng **Tử Vi Huyền Cơ** theo chuẩn:
+Nâng cấp toàn diện ứng dụng **Tử Vi Minh Khuê** theo chuẩn:
 - **Thẩm mỹ Cổ Tịch Trung Hoa (Sách Mộc Bản & Thư Pháp Tống–Minh)**: Triết lý Lưu Bạch, Giấy Tuyên Chỉ & Sơn Mài Huyền Dạ, Khung Song Biên (Double-line Frame), Con Dấu Ấn Triện (Red Seal Stamp), Họa Tiết Hồi Văn (Meander Corner), tuyệt đối không dùng Emoji, không gradient tím/xanh neon SaaS, không bo góc tròn to (`rounded-none` hoặc `rounded-[2px]`).
 - **Engine Tử Vi 110+ Sao Đầy Đủ**: 14 Chính Tinh (kèm `+`/`-`, Ngũ Hành, Miếu/Vượng/Đắc/Bình/Hãm), Lục Cát & Lục Sát, Vòng Bác Sĩ (12 sao), Vòng Thái Tuế (12 sao), Vòng Tràng Sinh (12 sao), Hệ phụ tinh theo Năm/Tháng/Ngày/Giờ (Thiên Hình, Thiên Riêu, Đẩu Quân, Tam Thai, Bát Tọa, Ân Quang, Thiên Quý...), Sao Lưu Niên, Tuần/Triệt.
 - **Bố Cục 3 Tầng Cho Từng Ô Cung**:

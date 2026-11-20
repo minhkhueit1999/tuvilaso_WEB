@@ -40,13 +40,13 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 border border-paper-gold dark:border-night-gold flex items-center justify-center bg-paper-cardAlt dark:bg-night-cardAlt text-paper-red dark:text-night-gold transition-transform hover:rotate-45 duration-700 cursor-pointer"
-            title="Tử Vi Huyền Cơ - Bát Quái Đẩu Số"
+            title="Tử Vi Minh Khuê - Bát Quái Đẩu Số"
           >
             <IconBatQuai className="w-6 h-6" />
           </div>
           <div>
             <h1 className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-paper-red dark:text-night-gold leading-none">
-              Tử Vi Huyền Cơ
+              Tử Vi Minh Khuê
             </h1>
             <p className="text-[10px] sm:text-xs text-paper-muted dark:text-night-muted hidden sm:block tracking-wide mt-0.5">
               Lập Lá Số & Luận Đoán Đẩu Số Á Đông • Sách Mộc Bản Tống–Minh

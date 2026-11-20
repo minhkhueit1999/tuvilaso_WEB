@@ -365,7 +365,7 @@ export const ChartForm: React.FC<ChartFormProps> = ({
             ) : (
               <>
                 <IconBatQuai className="w-4 h-4" />
-                <span>LẬP LÁ SỐ TỬ VI HUYỀN CƠ</span>
+                <span>LẬP LÁ SỐ TỬ VI MINH KHUÊ</span>
               </>
             )}
           </button>
