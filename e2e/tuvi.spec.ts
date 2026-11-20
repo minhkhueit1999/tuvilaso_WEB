@@ -188,4 +188,30 @@ test.describe('Tử Vi Minh Khuê - E2E Verification', () => {
     // Close modal
     await page.getByRole('button', { name: 'Đóng' }).click();
   });
+
+  test('8. Interactive Fortune Bar and Vận Hạn Tab (Đại Vận, Lưu Đại Hạn, Tiểu Hạn, Lưu Niên, Lưu Nguyệt)', async ({ page }) => {
+    await page.goto('/');
+
+    // Generate chart
+    await page.getByRole('button', { name: /(Dùng dữ liệu mẫu|Điền mẫu nhanh)/i }).click();
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator('#tuvi-laso-matrix')).toBeVisible({ timeout: 10000 });
+
+    // Verify Interactive Fortune Bar is displayed
+    const fortuneBar = page.getByTestId('fortune-bar');
+    await expect(fortuneBar).toBeVisible();
+    await expect(fortuneBar.getByText('DÒNG CHẢY VẬN HẠN')).toBeVisible();
+
+    // Switch to Vận Hạn Tab in Interpretation
+    const luckTabBtn = page.getByRole('button', { name: /Luận Vận Hạn Năm/i });
+    await expect(luckTabBtn).toBeVisible();
+    await luckTabBtn.click();
+
+    // Verify Thể (Đại Vận), Dụng (Tam Bàn Hợp Nhất), and Ứng Kỳ (12 Tháng Lưu Nguyệt)
+    await expect(page.getByText(/Đại Vận 10 Năm/i).first()).toBeVisible();
+    await expect(page.getByText(/Tam Bàn Hợp Nhất & Tọa Độ Vận Hạn/i)).toBeVisible();
+    await expect(page.getByText(/12 Tháng Lưu Nguyệt Năm/i)).toBeVisible();
+    await expect(page.locator('#chart-section').getByText('Tháng 1', { exact: true })).toBeVisible();
+    await expect(page.locator('#chart-section').getByText('Tháng 12', { exact: true })).toBeVisible();
+  });
 });

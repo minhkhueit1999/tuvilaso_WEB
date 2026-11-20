@@ -242,22 +242,16 @@ export function generateInterpretation(
     palaceInterpretations[palace.name] = content;
   }
 
-  // 4. Vận hạn
-  const birthYear = parseInt(thienBan.canChiYear.split(' ')[0], 10) || 1999;
-  const currentAge = Math.max(1, viewingYear - birthYear + 1);
-
-  let currentDecadePalace = palaces[0];
-  for (const palace of palaces) {
-    if (currentAge >= palace.daiHan && currentAge < palace.daiHan + 10) {
-      currentDecadePalace = palace;
-      break;
-    }
-  }
+  // 4. Vận hạn (Tam Bàn Hợp Nhất: Thể & Dụng)
+  const currentDecadePalace = palaces.find(p => p.isDV) || palaces.find(p => p.isMenh) || palaces[0];
+  const ldhPalace = palaces.find(p => p.isLDH) || palaces[0];
+  const tieuHanPalace = palaces.find(p => p.isTieuHan) || palaces[0];
+  const lnPalace = palaces.find(p => p.isLN) || palaces[0];
 
   const luckFortune = {
-    currentDecade: `Năm ${viewingYear} (đương số ${currentAge} tuổi ta): Đang trong đại vận 10 năm tại cung ${currentDecadePalace.name} (${currentDecadePalace.branch}, từ ${currentDecadePalace.daiHan} đến ${currentDecadePalace.daiHan + 9} tuổi). Cung này hội tụ ${currentDecadePalace.majorStars.map(s => s.name).join(', ') || 'Vô Chính Diệu'}, chủ về giai đoạn xây đắp nền móng, củng cố vị thế và mở rộng tầm nhìn dài hạn.`,
-    currentYear: `Tiểu hạn năm ${viewingYear}: Lưu Niên Thái Tuế kích hoạt năng lượng hành động. Đương số có nhiều cơ duyên kết giao đối tác mới, cần phát huy sự cẩn trọng và quyết đoán trong từng nước đi.`,
-    advice: `Lời khuyên thời vận: "Biết người biết ta, thuận thời ứng biến". Hiểu rõ điểm mạnh bản mệnh để tiến thủ, nhận diện thời vận để kiên nhẫn gieo hạt, lấy chữ Tín và chữ Đức làm kim chỉ nam thì vạn sự ắt hanh thông đại cát.`
+    currentDecade: `[THỂ — ĐẠI VẬN 10 NĂM]: Đang hành vận tại cung ${currentDecadePalace.name} (${currentDecadePalace.branch}, từ ${currentDecadePalace.daiHan} đến ${currentDecadePalace.daiHan + 9} tuổi). Cung này đóng vai trò Cung Mệnh của Đại Vận (ĐV.MỆNH), chi phối toàn bộ xu thế sự nghiệp, tài vận và nhân duyên trong cả thập kỷ.`,
+    currentYear: `[DỤNG — NĂM XEM HẠN ${viewingYear}]: Tọa độ 3 điểm kích hoạt gồm: Lưu Đại Hạn tại cung ${ldhPalace.name} (${ldhPalace.branch}), Tiểu Hạn tại cung ${tieuHanPalace.name} (${tieuHanPalace.branch}), và Lưu Thái Tuế tại cung ${lnPalace.name} (${lnPalace.branch}). Đây là nơi hội tụ các dòng chảy biến động thực tế trong năm.`,
+    advice: `[ỨNG XỬ THỜI VẬN]: Nắm chắc thế trận Đại Vận làm gốc (Thể) để định hướng, theo sát Lưu Đại Hạn và Tiểu Hạn (Dụng) để nắm bắt thời điểm vàng. Lấy sự bền bỉ, chân thành và minh bạch làm kim chỉ nam thì chuyển nguy thành an, hanh thông đại cát.`
   };
 
   const aspectScores = calculateAspectScores(palaces);

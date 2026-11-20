@@ -3,7 +3,9 @@ import {
   ChartData,
   Palace,
   ThienBan,
-  TuViSchool
+  TuViSchool,
+  Star,
+  VanHanCoordinates
 } from './types.js';
 import {
   solarToLunar,
@@ -13,7 +15,9 @@ import {
 import {
   getNapAm,
   getAmDuongNamNu,
-  calculateCuc
+  calculateCuc,
+  CAN_NAMES,
+  TU_HOA_TABLE
 } from './elements.js';
 import {
   CHI_NAMES,
@@ -26,9 +30,12 @@ import {
   buildTamPhuongTuChinh,
   calculateDaiHan,
   calculateTieuHan,
+  calculateDaiHanDetails,
   calculateDaiHanPalaceNames,
+  calculateLuuDaiHanPath,
+  calculateTieuHanInfo,
   calculateLuuNienPalaceNames,
-  calculateLuuNguyet
+  calculateLuuNguyetDetailed
 } from './palaces.js';
 import {
   findTuViPosition,
@@ -37,8 +44,7 @@ import {
   calculateTuHoaLyHuongTam,
   calculatePhiHoaTable,
   getChuMenh,
-  getChuThan,
-  TU_HOA_TABLE
+  getChuThan
 } from './stars.js';
 import { generateInterpretation, answerTuViQuestion } from './interpreter.js';
 
@@ -57,9 +63,12 @@ export function generateTuViChart(input: TuViInput): ChartData {
     minute = 0,
     isLeapMonth = false,
     viewingYear = 2026,
+    selectedDecadeIndex,
+    luuNguyetMethod = 'thai_tue',
     school = 'tong_hop',
     showTamPhuongTuChinh = true,
-    showLuuNien = true
+    showLuuNien = true,
+    showVanHanPath = true
   } = input;
 
   // 1. Quy đổi Lịch
@@ -158,23 +167,109 @@ export function generateTuViChart(input: TuViInput): ChartData {
     laiNhanPalaceId = menhIndex; // Fallback an toàn
   }
 
-  // 12. Tính toán Cung Đại Vận, Lưu Niên và Lưu Nguyệt
-  const birthYear = parseInt(canChi.canYear, 10) || year;
-  const currentAge = Math.max(1, viewingYear - birthYear + 1);
-
-  let currentDecadePalaceId = menhIndex;
+  // 12. Danh sách tên 12 Cung Bản Mệnh
+  const palaceNames: string[] = [];
   for (let i = 0; i < 12; i++) {
-    const dH = daiHanMap[i] ?? 0;
-    if (currentAge >= dH && currentAge < dH + 10) {
-      currentDecadePalaceId = i;
-      break;
-    }
+    const diffFromMenh = (menhIndex - i + 12) % 12;
+    palaceNames[i] = PALACE_NAMES[diffFromMenh];
   }
 
-  const chiViewingYearIndex = (viewingYear + 8) % 12;
-  const daiHanPalaceNamesMap = calculateDaiHanPalaceNames(menhIndex, currentDecadePalaceId);
-  const luuNienPalaceNamesMap = calculateLuuNienPalaceNames(menhIndex, chiViewingYearIndex);
-  const luuNguyetMap = calculateLuuNguyet(chiYearIndex, lunarMonth, chiHourIndex);
+  // Tuổi âm tại năm xem hạn: age = viewingYear - lunarYear + 1
+  const currentAge = Math.max(1, viewingYear - lunarYear + 1);
+
+  // Chi và Can của năm xem hạn
+  const viewChiIndex = ((viewingYear - 4) % 12 + 12) % 12;
+  const viewCanName = CAN_NAMES[((viewingYear - 4) % 10 + 10) % 10];
+
+  // (1) Đại Vận & Đồng Hạn
+  const daiHanDetails = calculateDaiHanDetails(
+    cuc.number,
+    canChi.canYear,
+    gender,
+    menhIndex,
+    currentAge,
+    palaceCanList,
+    palaceNames,
+    selectedDecadeIndex
+  );
+  const { dvDir, dvDirectionLabel, daiHanAges, daiVanList, activeDecade } = daiHanDetails;
+  const dvChi = activeDecade.dvChi;
+  const dvCan = palaceCanList[dvChi];
+  const dvStartAge = activeDecade.startAge;
+  const dvEndAge = activeDecade.endAge;
+
+  // (2) 12 Cung Đại Vận (Bắt buộc luôn đi THUẬN +1 từ dvChi)
+  const daiHanPalaceNamesMap = calculateDaiHanPalaceNames(dvChi);
+
+  // (3) Lưu Đại Hạn (10 năm Ziczac Nam Phái)
+  const daiVanYearlyPath = calculateLuuDaiHanPath(
+    dvChi,
+    dvDir,
+    dvStartAge,
+    lunarYear,
+    palaceCanList,
+    palaceNames
+  );
+  const offsetInDecade = currentAge - dvStartAge;
+  const clampedOffset = Math.max(0, Math.min(9, offsetInDecade));
+  const ldhStep = daiVanYearlyPath.find(p => p.offset === clampedOffset) || daiVanYearlyPath[0];
+  const ldhChi = ldhStep.chiIdx;
+  const ldhPalaceName = palaceNames[ldhChi];
+
+  // (4) Tiểu Hạn (Theo Giới tính)
+  const tieuHanInfo = calculateTieuHanInfo(canChi.chiYear, gender, currentAge);
+  const { tieuHanLabels, tieuHanChi } = tieuHanInfo;
+  const tieuHanPalaceName = palaceNames[tieuHanChi];
+
+  // (5) Lưu Niên Thái Tuế (Luôn đi THUẬN +1 từ viewChiIndex)
+  const luuNienPalaceNamesMap = calculateLuuNienPalaceNames(viewChiIndex);
+  const lnMenhChi = viewChiIndex;
+  const lnPalaceName = palaceNames[lnMenhChi];
+
+  // (6) Lưu Nguyệt Đẩu Quân (Thái Tuế / Tiểu Hạn)
+  const luuNguyetResult = calculateLuuNguyetDetailed(
+    viewChiIndex,
+    tieuHanChi,
+    lunarMonth,
+    chiHourIndex,
+    luuNguyetMethod
+  );
+  const luuNguyetMap = luuNguyetResult.luuNguyetMap;
+
+  // (7) Tứ Hóa Tầng Vận
+  const dvTuHoaRules = TU_HOA_TABLE[dvCan] || { loc: '', quyen: '', khoa: '', ky: '' };
+  const lnTuHoaRules = TU_HOA_TABLE[viewCanName] || { loc: '', quyen: '', khoa: '', ky: '' };
+
+  const applyVanHanTuHoa = (star: Star): Star => {
+    let dvTuHoa: Star['dvTuHoa'] = undefined;
+    if (dvTuHoaRules.loc && star.name === dvTuHoaRules.loc) dvTuHoa = 'ĐV.Lộc';
+    else if (dvTuHoaRules.quyen && star.name === dvTuHoaRules.quyen) dvTuHoa = 'ĐV.Quyền';
+    else if (dvTuHoaRules.khoa && star.name === dvTuHoaRules.khoa) dvTuHoa = 'ĐV.Khoa';
+    else if (dvTuHoaRules.ky && star.name === dvTuHoaRules.ky) dvTuHoa = 'ĐV.Kỵ';
+
+    let lnTuHoa: Star['lnTuHoa'] = undefined;
+    if (lnTuHoaRules.loc && star.name === lnTuHoaRules.loc) lnTuHoa = 'L.Hóa Lộc';
+    else if (lnTuHoaRules.quyen && star.name === lnTuHoaRules.quyen) lnTuHoa = 'L.Hóa Quyền';
+    else if (lnTuHoaRules.khoa && star.name === lnTuHoaRules.khoa) lnTuHoa = 'L.Hóa Khoa';
+    else if (lnTuHoaRules.ky && star.name === lnTuHoaRules.ky) lnTuHoa = 'L.Hóa Kỵ';
+
+    return {
+      ...star,
+      dvTuHoa,
+      lnTuHoa
+    };
+  };
+
+  const finalMajorStars: Record<number, Star[]> = {};
+  const finalCatStars: Record<number, Star[]> = {};
+  const finalSatStars: Record<number, Star[]> = {};
+  const finalMinorStars: Record<number, Star[]> = {};
+  for (let i = 0; i < 12; i++) {
+    finalMajorStars[i] = (majorStarsMap[i] || []).map(applyVanHanTuHoa);
+    finalCatStars[i] = (catStars[i] || []).map(applyVanHanTuHoa);
+    finalSatStars[i] = (satStars[i] || []).map(applyVanHanTuHoa);
+    finalMinorStars[i] = (updatedMinor[i] || []).map(applyVanHanTuHoa);
+  }
 
   // 13. Xây dựng 12 Cung
   const palaces: Palace[] = [];
@@ -182,8 +277,7 @@ export function generateTuViChart(input: TuViInput): ChartData {
   const allStarsLocation: Record<string, number> = {};
 
   for (let i = 0; i < 12; i++) {
-    const diffFromMenh = (menhIndex - i + 12) % 12;
-    const palaceName = PALACE_NAMES[diffFromMenh];
+    const palaceName = palaceNames[i];
     const can = palaceCanList[i];
     const branch = CHI_NAMES[i];
     const shortCan = can.charAt(0);
@@ -191,10 +285,10 @@ export function generateTuViChart(input: TuViInput): ChartData {
     const branchYinYangElement = BRANCH_YINYANG_ELEMENT[i];
 
     // Ghi nhận vị trí các sao để phục vụ Phi Tinh
-    for (const s of majorStarsMap[i] || []) {
+    for (const s of finalMajorStars[i] || []) {
       allStarsLocation[s.name] = i;
     }
-    for (const s of updatedMinor[i] || []) {
+    for (const s of finalMinorStars[i] || []) {
       allStarsLocation[s.name] = i;
     }
 
@@ -209,14 +303,18 @@ export function generateTuViChart(input: TuViInput): ChartData {
       isMenh: i === menhIndex,
       isThan: i === thanIndex,
       isLaiNhan: i === laiNhanPalaceId,
-      majorStars: majorStarsMap[i] || [],
-      catStars: catStars[i] || [],
-      satStars: satStars[i] || [],
-      minorStars: updatedMinor[i] || [],
+      isDV: i === dvChi,
+      isLDH: i === ldhChi,
+      isTieuHan: i === tieuHanChi,
+      isLN: i === lnMenhChi,
+      majorStars: finalMajorStars[i] || [],
+      catStars: finalCatStars[i] || [],
+      satStars: finalSatStars[i] || [],
+      minorStars: finalMinorStars[i] || [],
       triet: trietList.includes(i),
       tuan: tuanList.includes(i),
-      daiHan: daiHanMap[i] ?? 0,
-      tieuHan: tieuHanMap[i] ?? '',
+      daiHan: daiHanAges[i] ?? 0,
+      tieuHan: tieuHanLabels[i] ?? '',
       daiHanPalaceName: daiHanPalaceNamesMap[i] || '',
       luuNienPalaceName: luuNienPalaceNamesMap[i] || '',
       luuNguyet: luuNguyetMap[i] ?? 1,
@@ -277,7 +375,95 @@ export function generateTuViChart(input: TuViInput): ChartData {
     }
   };
 
-  // 17. Sinh Luận Giải Động theo trường phái
+  // 17. Chồng Cung (Tam Bàn Hợp Nhất)
+  const chongCungRelationships: string[] = [];
+  const checkPair = (nameA: string, chiA: number, nameB: string, chiB: number) => {
+    if (chiA === chiB) {
+      chongCungRelationships.push(`${nameA} và ${nameB} đồng cung tại ${CHI_NAMES[chiA]} (${palaceNames[chiA]}) — Khí lực trùng phùng, chuyển hóa mạnh mẽ.`);
+    } else if ((chiA - chiB + 12) % 12 === 6) {
+      chongCungRelationships.push(`${nameA} (${CHI_NAMES[chiA]}) xung chiếu ${nameB} (${CHI_NAMES[chiB]}) — Đối cung xung phá, cần dự phòng biến động.`);
+    } else if ((chiA - chiB + 12) % 12 === 4 || (chiA - chiB + 12) % 12 === 8) {
+      chongCungRelationships.push(`${nameA} (${CHI_NAMES[chiA]}) tam hợp ${nameB} (${CHI_NAMES[chiB]}) — Cục diện tương trợ, có cơ hội quý nhân phù trợ.`);
+    }
+  };
+  checkPair('Đại Vận', dvChi, 'Lưu Thái Tuế', lnMenhChi);
+  checkPair('Đại Vận', dvChi, 'Tiểu Hạn', tieuHanChi);
+  checkPair('Lưu Đại Hạn', ldhChi, 'Lưu Thái Tuế', lnMenhChi);
+  checkPair('Lưu Đại Hạn', ldhChi, 'Tiểu Hạn', tieuHanChi);
+  checkPair('Tiểu Hạn', tieuHanChi, 'Lưu Thái Tuế', lnMenhChi);
+  if (chongCungRelationships.length === 0) {
+    chongCungRelationships.push('Các tọa độ vận hạn phân bố độc lập trên bàn đồ, vận trình phân hóa đa hướng, không gặp thế xung khắc dồn dập.');
+  }
+
+  // 18. Lưới 12 Tháng Lưu Nguyệt
+  const luuNguyetTable = [];
+  for (let m = 1; m <= 12; m++) {
+    const entry = Object.entries(luuNguyetMap).find(([_, mon]) => mon === m);
+    const pId = entry ? parseInt(entry[0], 10) : 0;
+    const pMajor = (finalMajorStars[pId] || []).map(s => s.name);
+    let assessment = 'Bình hòa, ổn định kế hoạch';
+    if (pMajor.some(name => ['Tử Vi', 'Thiên Phủ', 'Vũ Khúc', 'Thái Âm', 'Thái Dương'].includes(name))) {
+      assessment = 'Cát lành hanh thông, thuận mưu đại sự';
+    } else if (pMajor.some(name => ['Thất Sát', 'Phá Quân', 'Tham Lang'].includes(name))) {
+      assessment = 'Biến chuyển bất ngờ, cần hành động quyết đoán';
+    } else if (pMajor.some(name => ['Cự Môn', 'Liêm Trinh', 'Thiên Đồng'].includes(name))) {
+      assessment = 'Cẩn trọng thị phi, chú ý lời ăn tiếng nói và giấy tờ';
+    }
+    luuNguyetTable.push({
+      month: m,
+      palaceId: pId,
+      palaceName: palaceNames[pId],
+      can: palaceCanList[pId],
+      branch: CHI_NAMES[pId],
+      majorStars: pMajor,
+      assessment
+    });
+  }
+
+  const vanHan: VanHanCoordinates = {
+    age: currentAge,
+    isDongHan: activeDecade.isDongHan,
+    dongHanPalaceName: activeDecade.dongHanPalaceName,
+    dvDir,
+    dvDirectionLabel,
+    dvChi,
+    dvPalaceName: palaceNames[dvChi],
+    dvCan,
+    dvStartAge,
+    dvEndAge,
+    dvTuHoa: {
+      loc: dvTuHoaRules.loc,
+      quyen: dvTuHoaRules.quyen,
+      khoa: dvTuHoaRules.khoa,
+      ky: dvTuHoaRules.ky
+    },
+    ldhChi,
+    ldhPalaceName,
+    tieuHanChi,
+    tieuHanPalaceName,
+    lnMenhChi,
+    lnPalaceName,
+    lnCan: viewCanName,
+    lnTuHoa: {
+      loc: lnTuHoaRules.loc,
+      quyen: lnTuHoaRules.quyen,
+      khoa: lnTuHoaRules.khoa,
+      ky: lnTuHoaRules.ky
+    },
+    chongCung: {
+      dvMenhOnBanMenh: `Cung ${palaceNames[dvChi]} (${CHI_NAMES[dvChi]})`,
+      ldhOnBanMenh: `Cung ${palaceNames[ldhChi]} (${CHI_NAMES[ldhChi]})`,
+      tieuHanOnBanMenh: `Cung ${palaceNames[tieuHanChi]} (${CHI_NAMES[tieuHanChi]})`,
+      lnMenhOnBanMenh: `Cung ${palaceNames[lnMenhChi]} (${CHI_NAMES[lnMenhChi]})`,
+      relationships: chongCungRelationships
+    },
+    luuNguyetMethod,
+    luuNguyetTable,
+    daiVanList,
+    daiVanYearlyPath
+  };
+
+  // 19. Sinh Luận Giải Động theo trường phái
   const interpretation = generateInterpretation(thienBan, palaces, tamPhuongTuChinh, viewingYear, school);
 
   return {
@@ -289,8 +475,10 @@ export function generateTuViChart(input: TuViInput): ChartData {
     palaces,
     tamPhuongTuChinh,
     phiHoaTable,
+    vanHan,
     interpretation,
     showTamPhuongTuChinh,
-    showLuuNien
+    showLuuNien,
+    showVanHanPath
   };
 }

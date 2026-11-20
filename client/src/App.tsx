@@ -10,6 +10,7 @@ import { ExportModal } from './components/ExportModal';
 import { KnowledgeModal } from './components/KnowledgeModal';
 import { SampleChartsModal } from './components/SampleChartsModal';
 import { TuViAssistant } from './components/TuViAssistant';
+import { InteractiveFortuneBar } from './components/InteractiveFortuneBar';
 import { generateTuViChart } from './engine';
 import { Download, RotateCcw, AlertCircle } from 'lucide-react';
 import { IconThaiCuc } from './components/OrientalIcons';
@@ -43,6 +44,9 @@ export const App: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [currentSchool, setCurrentSchool] = useState<TuViSchool>('tong_hop');
   const [lastInput, setLastInput] = useState<TuViInput | null>(null);
+  const [selectedDecadeIndex, setSelectedDecadeIndex] = useState<number | undefined>(undefined);
+  const [showVanHanPath, setShowVanHanPath] = useState<boolean>(true);
+  const [luuNguyetMethod, setLuuNguyetMethod] = useState<'thai_tue' | 'tieu_han'>('thai_tue');
 
   // History state
   const [historyList, setHistoryList] = useState<ChartData[]>([]);
@@ -106,11 +110,17 @@ export const App: React.FC = () => {
     setErrorMsg(null);
     const enrichedInput: TuViInput = {
       ...input,
-      school: input.school || currentSchool
+      school: input.school || currentSchool,
+      selectedDecadeIndex: input.selectedDecadeIndex !== undefined ? input.selectedDecadeIndex : selectedDecadeIndex,
+      luuNguyetMethod: input.luuNguyetMethod || luuNguyetMethod,
+      showVanHanPath: input.showVanHanPath !== undefined ? input.showVanHanPath : showVanHanPath
     };
     setLastInput(enrichedInput);
     if (enrichedInput.school) {
       setCurrentSchool(enrichedInput.school);
+    }
+    if (input.selectedDecadeIndex !== undefined) {
+      setSelectedDecadeIndex(input.selectedDecadeIndex);
     }
     let newChart: ChartData | null = null;
 
@@ -175,6 +185,39 @@ export const App: React.FC = () => {
     setCurrentSchool(newSchool);
     const inputToUse = lastInput || DEFAULT_INPUT;
     handleGenerateChart({ ...inputToUse, school: newSchool });
+  };
+
+  const handleSelectDecade = (decadeIdx: number) => {
+    setSelectedDecadeIndex(decadeIdx);
+    const inputToUse = lastInput || DEFAULT_INPUT;
+    handleGenerateChart({
+      ...inputToUse,
+      selectedDecadeIndex: decadeIdx,
+      luuNguyetMethod,
+      showVanHanPath
+    });
+  };
+
+  const handleSelectYear = (year: number) => {
+    const inputToUse = lastInput || DEFAULT_INPUT;
+    handleGenerateChart({
+      ...inputToUse,
+      viewingYear: year,
+      selectedDecadeIndex,
+      luuNguyetMethod,
+      showVanHanPath
+    });
+  };
+
+  const handleSelectLuuNguyetMethod = (method: 'thai_tue' | 'tieu_han') => {
+    setLuuNguyetMethod(method);
+    const inputToUse = lastInput || DEFAULT_INPUT;
+    handleGenerateChart({
+      ...inputToUse,
+      selectedDecadeIndex,
+      luuNguyetMethod: method,
+      showVanHanPath
+    });
   };
 
   const handleSelectChartFromHistory = (savedChart: ChartData) => {
@@ -242,6 +285,21 @@ export const App: React.FC = () => {
               onSelectSchool={handleSelectSchool}
             />
 
+            {/* Thanh Điều Hướng Dòng Chảy Vận Hạn */}
+            {chart.vanHan && (
+              <InteractiveFortuneBar
+                vanHan={chart.vanHan}
+                viewingYear={chart.thienBan.viewingYear}
+                selectedDecadeIndex={selectedDecadeIndex}
+                onSelectDecade={handleSelectDecade}
+                onSelectYear={handleSelectYear}
+                showPath={showVanHanPath}
+                onToggleShowPath={setShowVanHanPath}
+                luuNguyetMethod={luuNguyetMethod}
+                onChangeLuuNguyetMethod={handleSelectLuuNguyetMethod}
+              />
+            )}
+
             {/* Chart Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-paper-card dark:bg-night-card border border-paper-border dark:border-night-border rounded-none p-3 sm:px-5">
               <div className="flex items-center gap-2">
@@ -282,6 +340,7 @@ export const App: React.FC = () => {
               chartRef={chartMatrixRef}
               showTamPhuongTuChinh={chart.showTamPhuongTuChinh ?? true}
               showLuuNien={chart.showLuuNien ?? true}
+              showVanHanPath={showVanHanPath}
               activeSchool={currentSchool}
             />
 
